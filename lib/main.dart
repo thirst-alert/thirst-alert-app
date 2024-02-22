@@ -1,14 +1,16 @@
-// import libraries
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'api.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-void main() {
+Future main() async {
+  await dotenv.load();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,51 +31,77 @@ class _LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<_LoginPage> {
-  // TextEditingController for username and password fields
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  Api api = Api();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
       body: Padding(
-        padding: const EdgeInsets.all(50.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 50.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // Username TextField
+          children: [
             TextField(
               controller: _usernameController,
+              style: const TextStyle(),
               decoration: const InputDecoration(
                 labelText: 'Username',
+                // errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
               ),
             ),
-            const SizedBox(height: 16.0),
-            // Password TextField
             TextField(
               controller: _passwordController,
+              style: const TextStyle(),
               decoration: const InputDecoration(
                 labelText: 'Password',
               ),
               obscureText: true,
             ),
-            const SizedBox(height: 16.0),
-            // Login Button
-            ElevatedButton(
-              onPressed: () async {
-                String username = _usernameController.text;
-                String password = _passwordController.text;
-                print('Username: $username');
-                print('Password: $password');
-              },
-              child: const Text('Login'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onLogin,
+                child: const Text('Login'),
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onTest,
+                child: const Text('Test'),
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onDelete,
+                child: const Text('Delete storage'),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void onLogin() {
+    api.login({
+      'username': _usernameController.text,
+      'password': _passwordController.text,
+    });
+  }
+
+  void onTest() {
+    api.test()
+      .then((response) => {
+        print(response)
+      });
+  }
+
+  void onDelete() {
+    storage.deleteAll();
   }
 }
