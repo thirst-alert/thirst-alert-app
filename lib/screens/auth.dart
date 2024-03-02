@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import 'alert.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,7 +10,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _identityController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   Api api = Api();
@@ -29,7 +30,7 @@ class LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 60),
             TextField(
-              controller: _usernameController,
+              controller: _identityController,
               decoration: const InputDecoration(
                   label: Center(
                   child: Text("USERNAME OR EMAIL"),  
@@ -84,12 +85,17 @@ class LoginScreenState extends State<LoginScreen> {
 
   void onLogin() {
     api.login({
-      'username': _usernameController.text,
+      'identity': _identityController.text,
       'password': _passwordController.text,
-      });
-      Navigator.pushNamed(context, '/home');
-    }
-
+    }).then((response) {
+      if (response.success) {
+        Navigator.pushNamed(context, '/home');
+      } else {
+        String errorMessage = response.error ?? "An unknown error occurred";
+        Error.show(context, errorMessage);
+      }
+    });
+  }
   void onRegister() {
       Navigator.pushNamed(context, '/register');
     }

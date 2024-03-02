@@ -15,8 +15,6 @@ class ItemData {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
 
   final List<ItemData> myItems = [
     ItemData(name: 'My Boo', imagePath: 'lib/assets/a.png'),
