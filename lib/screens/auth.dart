@@ -29,7 +29,9 @@ class LoginScreenState extends State<LoginScreen> {
               'lib/assets/thirst-alert-logo.png',
               height: 75.0,
             ),
+
             const SizedBox(height: 60),
+
             TextField(
               controller: _identityController,
               decoration: const InputDecoration(
@@ -40,7 +42,9 @@ class LoginScreenState extends State<LoginScreen> {
               ),
               textAlign: TextAlign.center,
             ),
+
             const SizedBox(height: 20),
+            
             TextField(
               controller: _passwordController,
               textAlign: TextAlign.center,
@@ -124,11 +128,6 @@ class LoginScreenState extends State<LoginScreen> {
         }
       });
     }
-
-  // bool isValidEmail(String email) {
-  //   final emailRegex = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
-  //   return emailRegex.hasMatch(email);
-  // }
 
   void onVerify() async {
     api.verify({

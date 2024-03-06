@@ -15,11 +15,14 @@ class RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _repeatPasswordController = TextEditingController();
   final TextEditingController _verificationTokenController = TextEditingController();
+  bool validEmail = true;
+  bool validPassword = true;
 
   Api api = Api();
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -29,6 +32,7 @@ class RegisterScreenState extends State<RegisterScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 78),
         child: Column(
@@ -38,42 +42,83 @@ class RegisterScreenState extends State<RegisterScreen> {
               'lib/assets/thirst-alert-logo.png',
               height: 75.0,
             ),
-            const SizedBox(height: 60),
+
+            const SizedBox(height: 30),
+            // LEAVE MY CODE ALONE
+            // if (!validEmail)
+            //   const Card(
+            //     elevation: 3,
+            //     child: Padding(
+            //       padding:
+            //           EdgeInsets.all(10),
+            //       child: Row(
+            //         children: [
+            //           Icon(
+            //             Icons.error_rounded,
+            //             color: attention,
+            //           ),
+            //           SizedBox(width:10),
+            //           Text('Please enter a valid email address.'),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            const SizedBox(height: 30),
+
             TextField(
+              maxLength: 12,
               controller: _usernameController,
+              textAlign: TextAlign.center,
               decoration: const InputDecoration(
                 label: Center(
                   child: Text('USERNAME'),
                 ),
-                // errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
+                counterText: '',
               ),
-              textAlign: TextAlign.center,
             ),
+
             const SizedBox(height: 20),
+
             TextField(
               controller: _emailController,
               onChanged: (text) {
-                _emailController.text = text.toLowerCase();},
-              decoration: const InputDecoration(
-                label: Center(
+                _emailController.text = text.toLowerCase();
+                setState(() {
+                  validEmail = _validEmail(_emailController.text);
+                });
+              },
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                label: const Center(
                   child: Text('EMAIL'),
                 ),
-                // errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
+                errorMaxLines: 2,
+                errorText: validEmail ? null : 'Please enter a valid email address',
               ),
-              textAlign: TextAlign.center,
             ),
+
             const SizedBox(height: 20),
+
             TextField(
               controller: _passwordController,
+              onChanged: (text) {
+                setState(() {
+                  validPassword = _validPassword(_passwordController.text);
+                });
+              },
               textAlign: TextAlign.center,
-              decoration: const InputDecoration(
-                label: Center(
+              decoration: InputDecoration(
+                label: const Center(
                   child: Text('PASSWORD'),
                 ),
+                errorMaxLines: 4,
+                errorText: validPassword ? null : 'Passwords need a number, special character, lowercase and uppercase letter',
               ),
               obscureText: true,
             ),
+
             const SizedBox(height: 20),
+
             TextField(
               controller: _repeatPasswordController,
               textAlign: TextAlign.center,
@@ -84,16 +129,18 @@ class RegisterScreenState extends State<RegisterScreen> {
               ),
               obscureText: true,
             ),
+            const SizedBox(height: 100),
           ],
         ),
       ),
+
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: onRegister,
+            onPressed: validEmail || validPassword ? onRegister : null,
             child: const Text('CONTINUE'),
           ),
           const SizedBox(height: 60),
@@ -101,6 +148,22 @@ class RegisterScreenState extends State<RegisterScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  bool _validEmail(String email) {
+    final emailRegex = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+    return emailRegex.hasMatch(email);
+  }
+
+  bool _validPassword(String password) {
+    bool containsNumber = password.contains(RegExp(r'\d'));
+    bool containsSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    bool containsLowercase = password.contains(RegExp(r'[a-z]'));
+    bool containsUppercase = password.contains(RegExp(r'[A-Z]'));
+    return containsNumber &&
+        containsSpecialChar &&
+        containsLowercase &&
+        containsUppercase;
   }
 
   void onRegister() {
