@@ -3,7 +3,8 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-final unauthenticatedRoutes = ['/auth/register', '/auth/login', '/auth/refresh'];
+final unauthenticatedRoutes = ['/auth/register', '/auth/login', '/auth/refresh', '/auth/verify'
+];
 const storage = FlutterSecureStorage();
 
 Dio dio = Dio(BaseOptions(
@@ -126,6 +127,15 @@ class Api {
       await storage.write(key: 'username', value: response.data['user']['username']);
     }
     return response;
+  }
+
+  Future<ApiResponse<dynamic>> register(Map<String, dynamic> body) async {
+    return await _standardizeResponse(dio.post('/auth/register', data: body));
+  }
+  
+
+  Future<ApiResponse<dynamic>> verify(Map<String, dynamic> body) async {
+    return await _standardizeResponse(dio.post('/auth/verify', data: body));
   }
 
   Future<ApiResponse<dynamic>> test() async {

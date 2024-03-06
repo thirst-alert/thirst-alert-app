@@ -59,14 +59,23 @@ final ThemeData myTheme = ThemeData(
 
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
-      borderSide: const BorderSide(color: accent), // Customize border color
-      borderRadius: BorderRadius.circular(20),
+        borderSide: const BorderSide(color: accent),
+        borderRadius: BorderRadius.circular(20),
       ),
+      errorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: attention),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      errorStyle: const TextStyle(
+        color: text,
+        fontSize: 14.0,
+      ),     
       labelStyle: GoogleFonts.inter(fontSize: 14, color: text),
       filled: true,
       fillColor: surface,
-      contentPadding: const EdgeInsets.symmetric(vertical: 15.0),
+      contentPadding: const EdgeInsets.fromLTRB(45, 15, 45, 15),
       alignLabelWithHint: true, 
+      floatingLabelAlignment: FloatingLabelAlignment.center,
       ),
     
 
@@ -102,12 +111,16 @@ final ThemeData myTheme = ThemeData(
         const Size(218, 56),
         ),
       ),
+
+    // textButtonTheme: TextButtonThemeData(
+    // style: TextButton.styleFrom(
+      
+    // ),
      
       //   padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
       //   const EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
-      // ),
-    )
-  );
+      ),
+    );
 
     // cardTheme: CardTheme(
     //   shape: RoundedRectangleBorder(
