@@ -38,7 +38,7 @@ class HomeScreenState extends State<HomeScreen> {
         title: FutureBuilder<String?>(
           future: _getUserName(),
           builder: (context, snapshot) {
-            final username = snapshot.data ?? 'Stanger';
+            final username = snapshot.data ?? '';
             return Text('Hello, $username');
           },
         ),

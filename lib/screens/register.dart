@@ -100,6 +100,7 @@ class RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 20),
 
             TextField(
+              maxLength: 32,
               controller: _passwordController,
               onChanged: (text) {
                 setState(() {
@@ -111,6 +112,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                 label: const Center(
                   child: Text('PASSWORD'),
                 ),
+                counterText: '',
                 errorMaxLines: 4,
                 errorText: validPassword ? null : 'Passwords need a number, special character, lowercase and uppercase letter',
               ),
@@ -129,7 +131,7 @@ class RegisterScreenState extends State<RegisterScreen> {
               ),
               obscureText: true,
             ),
-            const SizedBox(height: 100),
+            const SizedBox(height: 350),
           ],
         ),
       ),
@@ -140,7 +142,7 @@ class RegisterScreenState extends State<RegisterScreen> {
         children: [
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: validEmail || validPassword ? onRegister : null,
+            onPressed: validEmail && validPassword ? onRegister : null,
             child: const Text('CONTINUE'),
           ),
           const SizedBox(height: 60),
@@ -169,6 +171,10 @@ class RegisterScreenState extends State<RegisterScreen> {
   void onRegister() {
     if (_passwordController.text != _repeatPasswordController.text) {
       Error.show(context, 'Passwords do not match');
+      return;
+    }
+    if (_passwordController.text.length < 8) {
+      Error.show(context, 'Passwords needs to have at least 8 characters');
       return;
     }
     api.register({
