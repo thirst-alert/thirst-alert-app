@@ -15,7 +15,7 @@ class Error {
               children: <Widget>[
                 const Icon(Icons.error, size: 50, color: attention),
                 const SizedBox(height: 20),
-                Text(errorMessage),
+                Text(errorMessage, textAlign: TextAlign.center),
               ],
             ),
           ),
@@ -34,20 +34,20 @@ class Error {
 }
 
 class Success {
-  static Future<void> show(BuildContext context) async {
+  static Future<void> show(BuildContext context, String message) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           actionsAlignment: MainAxisAlignment.center,
-          content: const SingleChildScrollView(
+          content: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(Icons.check_circle, size: 50, color: accent),
-                SizedBox(height: 20),
-                Text("Success"),
+                const Icon(Icons.check_circle, size: 50, color: accent),
+                const SizedBox(height: 20),
+                Text(message, textAlign: TextAlign.center),
               ],
             ),
           ),

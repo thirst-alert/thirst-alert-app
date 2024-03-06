@@ -12,6 +12,7 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   final TextEditingController _identityController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _verificationTokenController = TextEditingController(); 
 
   Api api = Api();
 
@@ -33,7 +34,7 @@ class LoginScreenState extends State<LoginScreen> {
               controller: _identityController,
               decoration: const InputDecoration(
                   label: Center(
-                  child: Text("USERNAME OR EMAIL"),  
+                  child: Text('USERNAME OR EMAIL'),  
                 ),
                 // errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
               ),
@@ -45,7 +46,7 @@ class LoginScreenState extends State<LoginScreen> {
               textAlign: TextAlign.center,
               decoration: const InputDecoration(
                   label: Center(
-                  child: Text("PASSWORD"),
+                  child: Text('PASSWORD'),
                 ),
               ),
               obscureText: true,
@@ -70,10 +71,6 @@ class LoginScreenState extends State<LoginScreen> {
             // MAKE HEIGHT 60 WHEN YOU REMOVE TEMP BUTTONS
             const SizedBox(height: 5),
             TextButton(
-              onPressed: onTest,
-              child: const Text('home'),
-            ),
-            TextButton(
               onPressed: onDelete,
               child: const Text('delete storage'),
             ),
@@ -87,24 +84,72 @@ class LoginScreenState extends State<LoginScreen> {
     api.login({
       'identity': _identityController.text,
       'password': _passwordController.text,
+      }).then((response) async {
+        if (response.success) {
+          Navigator.pushNamed(context, '/home');
+        } else {
+          String errorMessage = response.error ?? 'An unknown error occurred';
+          if (errorMessage.contains('Forbidden: Email not verified')) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  actionsAlignment: MainAxisAlignment.center,
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        const SizedBox(height: 20),
+                        Text('Enter the code sent to ${_identityController.text}',
+                          textAlign: TextAlign.center),
+                        const SizedBox(height: 20),
+                        TextField(
+                          controller: _verificationTokenController,
+                          textAlign: TextAlign.center,
+                        ),
+                      ]
+                    )
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: onVerify,
+                      child: const Text('CONFIRM'),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+          Error.show(context, errorMessage);
+        }
+      });
+    }
+
+  // bool isValidEmail(String email) {
+  //   final emailRegex = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+  //   return emailRegex.hasMatch(email);
+  // }
+
+  void onVerify() async {
+    api.verify({
+      'token': _verificationTokenController.text,
+      'identity': _identityController.text,
     }).then((response) {
       if (response.success) {
         Navigator.pushNamed(context, '/home');
+        Success.show(context, 'Welcome to Thirst Alert!');
       } else {
-        String errorMessage = response.error ?? "An unknown error occurred";
+        String errorMessage = response.error ?? 'An unknown verification error occurred';
         Error.show(context, errorMessage);
       }
     });
   }
+  
   void onRegister() {
-      Navigator.pushNamed(context, '/register');
-    }
-
-  void onTest() {
-        Navigator.pushNamed(context, '/home');
-    }
+    Navigator.pushNamed(context, '/register');
+  }
 
   void onDelete() {
-      storage.deleteAll();
-    }
+    storage.deleteAll();
   }
+}

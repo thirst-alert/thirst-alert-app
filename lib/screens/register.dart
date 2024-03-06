@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import 'alert.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -10,7 +11,10 @@ class RegisterScreen extends StatefulWidget {
 
 class RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _repeatPasswordController = TextEditingController();
+  final TextEditingController _verificationTokenController = TextEditingController();
 
   Api api = Api();
 
@@ -23,7 +27,7 @@ class RegisterScreenState extends State<RegisterScreen> {
         leading: IconButton(
           icon: const Icon(Icons.chevron_left),
           onPressed: () => Navigator.of(context).pop(),
-        ), 
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 78),
@@ -39,7 +43,7 @@ class RegisterScreenState extends State<RegisterScreen> {
               controller: _usernameController,
               decoration: const InputDecoration(
                 label: Center(
-                  child: Text("EMAIL"),
+                  child: Text('USERNAME'),
                 ),
                 // errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
               ),
@@ -47,10 +51,12 @@ class RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: _usernameController,
+              controller: _emailController,
+              onChanged: (text) {
+                _emailController.text = text.toLowerCase();},
               decoration: const InputDecoration(
                 label: Center(
-                  child: Text("USERNAME"),
+                  child: Text('EMAIL'),
                 ),
                 // errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
               ),
@@ -62,18 +68,18 @@ class RegisterScreenState extends State<RegisterScreen> {
               textAlign: TextAlign.center,
               decoration: const InputDecoration(
                 label: Center(
-                  child: Text("PASSWORD"),
+                  child: Text('PASSWORD'),
                 ),
               ),
               obscureText: true,
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: _passwordController,
+              controller: _repeatPasswordController,
               textAlign: TextAlign.center,
               decoration: const InputDecoration(
                 label: Center(
-                  child: Text("REPEAT PASSWORD"),
+                  child: Text('REPEAT PASSWORD'),
                 ),
               ),
               obscureText: true,
@@ -87,8 +93,8 @@ class RegisterScreenState extends State<RegisterScreen> {
         children: [
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: onTest,
-            child: const Text('VERIFY'),
+            onPressed: onRegister,
+            child: const Text('CONTINUE'),
           ),
           const SizedBox(height: 60),
         ],
@@ -97,7 +103,66 @@ class RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void onTest() {
-    api.test().then((response) => {print(response)});
+  void onRegister() {
+    if (_passwordController.text != _repeatPasswordController.text) {
+      Error.show(context, 'Passwords do not match');
+      return;
+    }
+    api.register({
+      'username': _usernameController.text,
+      'email': _emailController.text,
+      'password': _passwordController.text,
+    }).then((response) {
+      if (response.success) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              actionsAlignment: MainAxisAlignment.center,
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const SizedBox(height: 20),
+                    Text('Enter the code sent to ${_emailController.text}',
+                      textAlign: TextAlign.center),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _verificationTokenController,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                )
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: onVerify,
+                  child: const Text('CONFIRM'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        String errorMessage = response.error ?? 'An unknown error occurred';
+        Error.show(context, errorMessage);
+      }
+    });
+  }
+
+  void onVerify() {
+    api.verify({
+    'token': _verificationTokenController.text,
+    'identity': _emailController.text,
+    }).then((response) {
+      if (response.success) {
+        Navigator.pushNamed(context, '/home');
+        Success.show(context, 'Welcome to Thirst Alert!');
+      } else {
+        String errorMessage = response.error ?? 'An unknown verification error occurred';
+        Error.show(context, errorMessage);
+      }
+    });
   }
 }

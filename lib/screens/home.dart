@@ -16,6 +16,11 @@ class ItemData {
 
 class HomeScreenState extends State<HomeScreen> {
 
+// TEST THIS FROM REGISTER ROUTE
+  Future<String?> _getUserName() async {
+    return await storage.read(key: 'username');
+  }
+
   final List<ItemData> myItems = [
     ItemData(name: 'My Boo', imagePath: 'lib/assets/a.png'),
     ItemData(name: 'Monstera', imagePath: 'lib/assets/b.jpg'),
@@ -30,14 +35,20 @@ class HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hello, _getUserName'),
+        title: FutureBuilder<String?>(
+          future: _getUserName(),
+          builder: (context, snapshot) {
+            final username = snapshot.data ?? 'Stanger';
+            return Text('Hello, $username');
+          },
+        ),
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
               icon: const Icon(Icons.account_box_rounded),
               onPressed: () { Scaffold.of(context).openDrawer(); },
               tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-          );
+            );
           },
         ),
         actions: [
@@ -97,7 +108,6 @@ class HomeScreenState extends State<HomeScreen> {
     ),
   );
 }
-
 
   void onLogout() {
     Navigator.pushNamed(context, '/');
