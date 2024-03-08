@@ -45,9 +45,8 @@ class HomeScreenState extends State<HomeScreen> {
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
-              icon: const Icon(Icons.account_box_rounded),
-              onPressed: () { Scaffold.of(context).openDrawer(); },
-              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              icon: const Icon(Icons.menu_rounded),
+              onPressed: () { Navigator.pushNamed(context, '/user'); },
             );
           },
         ),

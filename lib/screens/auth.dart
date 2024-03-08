@@ -72,12 +72,12 @@ class LoginScreenState extends State<LoginScreen> {
               onPressed: onRegister,
               child: const Text('REGISTER'),
             ),
-            // MAKE HEIGHT 60 WHEN YOU REMOVE TEMP BUTTONS
-            const SizedBox(height: 5),
+            const SizedBox(height: 10),
             TextButton(
               onPressed: onDelete,
               child: const Text('delete storage'),
             ),
+            const SizedBox(height: 20)
           ],          
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -148,6 +148,7 @@ class LoginScreenState extends State<LoginScreen> {
     Navigator.pushNamed(context, '/register');
   }
 
+// replace button with RESET PASSWORD
   void onDelete() {
     storage.deleteAll();
   }

@@ -4,6 +4,8 @@ import 'theme.dart';
 import 'screens/auth.dart';
 import 'screens/register.dart';
 import 'screens/home.dart';
+import 'screens/user.dart';
+import 'screens/information.dart';
 
 Future main() async {
   await dotenv.load();
@@ -22,7 +24,9 @@ class MyApp extends StatelessWidget {
         '/': (context) => const LoginScreen(),
         '/register':(context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
-     },
+        '/user': (context) => const UserScreen(),
+        '/information': (context) => InformationScreen(0),
+      },
     );
   }
 }

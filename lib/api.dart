@@ -138,6 +138,10 @@ class Api {
     return await _standardizeResponse(dio.post('/auth/verify', data: body));
   }
 
+  Future<ApiResponse<dynamic>> deleteUser() async {
+    return await _standardizeResponse(dio.delete('/user'));
+  }
+
   Future<ApiResponse<dynamic>> test() async {
     return await _standardizeResponse(dio.post('/test'));
   }
