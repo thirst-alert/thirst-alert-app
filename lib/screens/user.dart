@@ -122,70 +122,74 @@ class UserScreenState extends State<UserScreen> {
                 context: context,
                 barrierDismissible: true,
                 builder: (BuildContext context) {
-                  return AlertDialog(
-                    actionsAlignment: MainAxisAlignment.center,
-                    content: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            const SizedBox(height: 20),
-                            TextField(
-                              controller: _oldPasswordController,
-                              textAlign: TextAlign.center,
-                              decoration: InputDecoration(
-                                label: const Center(
-                                  child: Text('PASSWORD'),
+                  return StatefulBuilder(builder: (context, StateSetter setState) {
+                    return AlertDialog(
+                      actionsAlignment: MainAxisAlignment.center,
+                      content: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              const SizedBox(height: 20),
+                              TextField(
+                                controller: _oldPasswordController,
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  label: const Center(
+                                    child: Text('PASSWORD'),
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_passwordIsObscured
+                                        ? Icons.visibility
+                                        : Icons.visibility_off),
+                                    onPressed: () => setState(() {
+                                      _passwordIsObscured = !_passwordIsObscured;
+                                    }),
+                                  ),
                                 ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(_passwordIsObscured
-                                      ? Icons.visibility
-                                      : Icons.visibility_off),
-                                  onPressed: () => setState(() {
-                                    _passwordIsObscured = !_passwordIsObscured;
-                                  }),
+                                obscureText: _passwordIsObscured,
+                              ),  
+                              const SizedBox(height: 20),
+                              TextField(
+                                maxLength: 32,
+                                controller: _newPasswordController,
+                                onChanged: (text) {
+                                  setState(() {
+                                    validPassword =
+                                      _validPassword(_newPasswordController.text);
+                                  });
+                                },
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  label: const Center(
+                                    child: Text('NEW PASSWORD'),
+                                  ),
+                                  counterText: '',
+                                  errorMaxLines: 4,
+                                  errorText: validPassword ? null : 'Passwords need a number, special character, lowercase and uppercase letter',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_passwordIsObscured
+                                        ? Icons.visibility
+                                        : Icons.visibility_off),
+                                    onPressed: () {
+                                      setState(() {
+                                        _passwordIsObscured = !_passwordIsObscured;
+                                      });
+                                    },
+                                  ),
                                 ),
-                              ),
-                              obscureText: _passwordIsObscured,
-                            ),  
-                            const SizedBox(height: 20),
-                            TextField(
-                              maxLength: 32,
-                              controller: _newPasswordController,
-                              onChanged: (text) {
-                                setState(() {
-                                  validPassword =
-                                    _validPassword(_newPasswordController.text);
-                                });
-                              },
-                              textAlign: TextAlign.center,
-                              decoration: InputDecoration(
-                                label: const Center(
-                                  child: Text('NEW PASSWORD'),
-                                ),
-                                counterText: '',
-                                errorMaxLines: 4,
-                                errorText: validPassword ? null : 'Passwords need a number, special character, lowercase and uppercase letter',
-                                suffixIcon: IconButton(
-                                  icon: Icon(_passwordIsObscured
-                                      ? Icons.visibility
-                                      : Icons.visibility_off),
-                                  onPressed: () => setState(() {
-                                    _passwordIsObscured = !_passwordIsObscured;
-                                  }),
-                                ),
-                              ),
-                              obscureText: _passwordIsObscured,
-                            ),                              
-                          ],
-                        )
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: validPassword ? onChangePassword : null,
-                          child: const Text('CHANGE PASSWORD'),
+                                obscureText: _passwordIsObscured,
+                              ),                              
+                            ],
+                          )
                         ),
-                      ],
-                    );
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: validPassword ? onChangePassword : null,
+                            child: const Text('CHANGE PASSWORD'),
+                          ),
+                        ],
+                      );
+                    });
                   },
                 );
               },
