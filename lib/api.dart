@@ -25,7 +25,6 @@ Dio dio = Dio(BaseOptions(
   onError: (DioException error, handler) async {
     final request = error.requestOptions;
     if (unauthenticatedRoutes.contains(request.path)) return handler.next(error);
-
     if (error.response?.statusCode == 401) {
       try {
         final refreshToken = await storage.read(key: 'refresh_token');
@@ -132,7 +131,6 @@ class Api {
   Future<ApiResponse<dynamic>> register(Map<String, dynamic> body) async {
     return await _standardizeResponse(dio.post('/auth/register', data: body));
   }
-  
 
   Future<ApiResponse<dynamic>> verify(Map<String, dynamic> body) async {
     return await _standardizeResponse(dio.post('/auth/verify', data: body));
@@ -142,7 +140,11 @@ class Api {
     return await _standardizeResponse(dio.delete('/user'));
   }
 
-  Future<ApiResponse<dynamic>> test() async {
-    return await _standardizeResponse(dio.post('/test'));
+  Future<ApiResponse<dynamic>> createSensor(Map<String, dynamic> body) async {
+    return await _standardizeResponse(dio.post('/sensor', data: body));
+  }
+
+  Future<ApiResponse<dynamic>> deleteSensor(String sensorId) async {
+    return await _standardizeResponse(dio.delete('/sensor/$sensorId'));
   }
 }

@@ -102,11 +102,31 @@ class HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
+          SizedBox(
+            height: 60,
+            width: 60,
+            child: ElevatedButton(
+              onPressed: onAddDevice,
+              style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.zero
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     ),
   );
 }
+
+  void onAddDevice() async {
+    Navigator.pushNamed(context, '/sensor/start');
+  }
 
   void onLogout() {
     Navigator.pushNamed(context, '/');
