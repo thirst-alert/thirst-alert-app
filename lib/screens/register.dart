@@ -17,6 +17,7 @@ class RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _verificationTokenController = TextEditingController();
   bool validEmail = true;
   bool validPassword = true;
+  bool _passwordIsObscured = true;
 
   Api api = Api();
 
@@ -115,8 +116,16 @@ class RegisterScreenState extends State<RegisterScreen> {
                 counterText: '',
                 errorMaxLines: 4,
                 errorText: validPassword ? null : 'Passwords need a number, special character, lowercase and uppercase letter',
+                suffixIcon: IconButton(
+                  icon: Icon(_passwordIsObscured
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: () => setState(() {
+                    _passwordIsObscured = !_passwordIsObscured;
+                  }),
+                ),
               ),
-              obscureText: true,
+              obscureText: _passwordIsObscured,
             ),
 
             const SizedBox(height: 20),
@@ -124,12 +133,20 @@ class RegisterScreenState extends State<RegisterScreen> {
             TextField(
               controller: _repeatPasswordController,
               textAlign: TextAlign.center,
-              decoration: const InputDecoration(
-                label: Center(
+              decoration: InputDecoration(
+                label: const Center(
                   child: Text('REPEAT PASSWORD'),
                 ),
+                suffixIcon: IconButton(
+                  icon: Icon(_passwordIsObscured
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: () => setState(() {
+                    _passwordIsObscured = !_passwordIsObscured;
+                  }),
+                ),
               ),
-              obscureText: true,
+              obscureText: _passwordIsObscured,
             ),
             const SizedBox(height: 350),
           ],
