@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import 'alert.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -129,6 +130,12 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   void onLogout() {
-    Navigator.pushNamed(context, '/');
+    try {
+      storage.deleteAll();
+      Navigator.pushNamed(context, '/');
+      Success.show(context, 'Logged out successfully');
+    } catch(e) {
+      Error.show(context, 'Something went wrong');
+    }
   }
 }

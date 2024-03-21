@@ -9,9 +9,14 @@ class UserScreen extends StatefulWidget {
 
   @override
   UserScreenState createState() => UserScreenState();
-}
+}  
+
 
 class UserScreenState extends State<UserScreen> {
+  final TextEditingController _oldPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  bool validPassword = true;
+  bool _passwordIsObscured = true;
   int selectTab = 0;
 
   Api api = Api();
@@ -35,7 +40,6 @@ class UserScreenState extends State<UserScreen> {
           children: [
 
             // UNFINISHED:
-            // Change password
             // Share
 
             TextButton(
@@ -94,25 +98,103 @@ class UserScreenState extends State<UserScreen> {
           ],
         ),
       ),
+      
       floatingActionButton: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            ElevatedButton (
-              onPressed: onShare,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('SHARE'),
-                  SizedBox(width: 10),
-                  Icon(Icons.share_rounded),
-                ],
-              ),
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          ElevatedButton (
+            onPressed: onShare,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('SHARE'),
+                SizedBox(width: 10),
+                Icon(Icons.share_rounded),
+              ],
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: onChangePassword,
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                barrierDismissible: true,
+                builder: (BuildContext context) {
+                  return StatefulBuilder(builder: (context, StateSetter setState) {
+                    return AlertDialog(
+                      actionsAlignment: MainAxisAlignment.center,
+                      content: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              const SizedBox(height: 20),
+                              TextField(
+                                controller: _oldPasswordController,
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  label: const Center(
+                                    child: Text('PASSWORD'),
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_passwordIsObscured
+                                        ? Icons.visibility
+                                        : Icons.visibility_off),
+                                    onPressed: () => setState(() {
+                                      _passwordIsObscured = !_passwordIsObscured;
+                                    }),
+                                  ),
+                                  contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
+                                ),
+                                obscureText: _passwordIsObscured,
+                              ),  
+                              const SizedBox(height: 20),
+                              TextField(
+                                maxLength: 32,
+                                controller: _newPasswordController,
+                                onChanged: (text) {
+                                  setState(() {
+                                    validPassword =
+                                      _validPassword(_newPasswordController.text);
+                                  });
+                                },
+                                textAlign: TextAlign.center,
+                                decoration: InputDecoration(
+                                  label: const Center(
+                                    child: Text('NEW PASSWORD'),
+                                  ),
+                                  counterText: '',
+                                  errorMaxLines: 4,
+                                  errorText: validPassword ? null : 'Passwords need a number, special character, lowercase and uppercase letter',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(_passwordIsObscured
+                                        ? Icons.visibility
+                                        : Icons.visibility_off),
+                                    onPressed: () {
+                                      setState(() {
+                                        _passwordIsObscured = !_passwordIsObscured;
+                                      });
+                                    },
+                                  ),
+                                  contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
+                                ),
+                                obscureText: _passwordIsObscured,
+                              ),                              
+                            ],
+                          )
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: validPassword ? onChangePassword : null,
+                            child: const Text('CHANGE PASSWORD'),
+                          ),
+                        ],
+                      );
+                    });
+                  },
+                );
+              },
               child: const Text('CHANGE MY PASSWORD'),
             ),
             const SizedBox(height: 20),
@@ -175,7 +257,34 @@ class UserScreenState extends State<UserScreen> {
     Navigator.pushNamed(context, '/');
   }
 
+  bool _validPassword(String password) {
+    bool containsNumber = password.contains(RegExp(r'\d'));
+    bool containsSpecialChar =
+        password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    bool containsLowercase = password.contains(RegExp(r'[a-z]'));
+    bool containsUppercase = password.contains(RegExp(r'[A-Z]'));
+    return containsNumber &&
+        containsSpecialChar &&
+        containsLowercase &&
+        containsUppercase;
+  }
+
   void onChangePassword() {
-    Navigator.pushNamed(context, '/');
+    if (_newPasswordController.text.length < 8) {
+      Error.show(context, 'Passwords needs to have at least 8 characters');
+      return;
+    }
+    api.changePassword({
+      'oldPassword': _oldPasswordController.text,
+      'newPassword': _newPasswordController.text
+    }).then((response) {
+      if (response.success) {
+        Navigator.pushNamed(context, '/user');
+        Success.show(context, 'Your password has been changed');
+      } else {
+        String errorMessage = response.error ?? 'An unknown error occurred';
+        Error.show(context, errorMessage);
+      }
+    });
   }
 }

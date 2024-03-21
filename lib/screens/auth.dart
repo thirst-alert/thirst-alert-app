@@ -12,7 +12,8 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   final TextEditingController _identityController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _verificationTokenController = TextEditingController(); 
+  final TextEditingController _verificationTokenController = TextEditingController();
+  bool _passwordIsObscured = true;
 
   Api api = Api();
 
@@ -48,12 +49,20 @@ class LoginScreenState extends State<LoginScreen> {
             TextField(
               controller: _passwordController,
               textAlign: TextAlign.center,
-              decoration: const InputDecoration(
-                  label: Center(
+              decoration: InputDecoration(
+                  label: const Center(
                   child: Text('PASSWORD'),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(_passwordIsObscured ? Icons.visibility : Icons.visibility_off),
+                    onPressed: () => setState(() {
+                      _passwordIsObscured = !_passwordIsObscured;
+                    }
+                  ),
                 ),
+                contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
               ),
-              obscureText: true,
+              obscureText: _passwordIsObscured,
             ),
           ],
         ),
@@ -74,8 +83,40 @@ class LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 10),
             TextButton(
-              onPressed: onDelete,
-              child: const Text('delete storage'),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      actionsAlignment: MainAxisAlignment.center,
+                      content: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              const SizedBox(height: 20),
+                              TextField(
+                                controller: _identityController,
+                                textAlign: TextAlign.center,
+                                decoration: const InputDecoration(
+                                  label: Center(
+                                    child: Text('ACCOUNT EMAIL'),)
+                                ),
+                              ),
+                            ],
+                          )
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: onResetPassword,
+                          child: const Text('RESET PASSWORD'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text('RESET MY PASSWORD'),
             ),
             const SizedBox(height: 20)
           ],          
@@ -148,8 +189,16 @@ class LoginScreenState extends State<LoginScreen> {
     Navigator.pushNamed(context, '/register');
   }
 
-// replace button with RESET PASSWORD
-  void onDelete() {
-    storage.deleteAll();
+  void onResetPassword() {
+    api.resetPassword({
+      'email': _identityController.text
+    }).then((response) {      
+      if (response.success) {
+        Success.show(context, 'We sent you an email to reset your password');
+      } else {
+        String errorMessage = response.error ?? 'An unknown error occurred. Please make sure your email is correct.';
+        Error.show(context, errorMessage);
+      }
+    });
   }
 }

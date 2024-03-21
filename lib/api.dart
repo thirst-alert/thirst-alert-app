@@ -136,6 +136,14 @@ class Api {
     return await _standardizeResponse(dio.post('/auth/verify', data: body));
   }
 
+  Future<ApiResponse<dynamic>> resetPassword(Map<String, dynamic> body) async {
+    return await _standardizeResponse(dio.post('/user/reset-password', data: body));
+  }
+  
+  Future<ApiResponse<dynamic>> changePassword(Map<String, dynamic> body) async {
+    return await _standardizeResponse(dio.patch('/user/patch-password', data: body));
+  }
+
   Future<ApiResponse<dynamic>> deleteUser() async {
     return await _standardizeResponse(dio.delete('/user'));
   }
