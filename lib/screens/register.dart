@@ -124,6 +124,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                     _passwordIsObscured = !_passwordIsObscured;
                   }),
                 ),
+                contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
               ),
               obscureText: _passwordIsObscured,
             ),
@@ -145,6 +146,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                     _passwordIsObscured = !_passwordIsObscured;
                   }),
                 ),
+                contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
               ),
               obscureText: _passwordIsObscured,
             ),

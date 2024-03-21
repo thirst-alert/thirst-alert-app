@@ -144,6 +144,7 @@ class UserScreenState extends State<UserScreen> {
                                     _passwordIsObscured = !_passwordIsObscured;
                                   }),
                                 ),
+                                contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
                               ),
                               obscureText: _passwordIsObscured,
                             ),  
@@ -173,6 +174,7 @@ class UserScreenState extends State<UserScreen> {
                                     _passwordIsObscured = !_passwordIsObscured;
                                   }),
                                 ),
+                                contentPadding:const EdgeInsets.fromLTRB(48, 16, 0, 16),
                               ),
                               obscureText: _passwordIsObscured,
                             ),                              

@@ -146,7 +146,7 @@ class Api {
   }
 
   Future<ApiResponse<dynamic>> deleteUser() async {
-    return await _standardizeResponse(dio.delete('/user/delete'));
+    return await _standardizeResponse(dio.delete('/user'));
   }
 
   Future<ApiResponse<dynamic>> test() async {

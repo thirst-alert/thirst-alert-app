@@ -60,6 +60,7 @@ class LoginScreenState extends State<LoginScreen> {
                     }
                   ),
                 ),
+                contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
               ),
               obscureText: _passwordIsObscured,
             ),
