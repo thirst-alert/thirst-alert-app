@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
 
+class AlertOptions {
+  final String? buttonText;
+  final Function()? onPressed;
+
+  AlertOptions({this.buttonText, this.onPressed});
+}
+
 class Error {
-  static Future<void> show(BuildContext context, String errorMessage) async {
+  static Future<void> show(BuildContext context, String errorMessage, [AlertOptions? options]) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -21,10 +28,10 @@ class Error {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('CLOSE'),
-              onPressed: () {
+              onPressed: options?.onPressed ?? () {
                 Navigator.of(context).pop();
               },
+              child: Text(options?.buttonText ?? 'CLOSE'),
             ),
           ],
         );
@@ -34,7 +41,7 @@ class Error {
 }
 
 class Success {
-  static Future<void> show(BuildContext context, String message) async {
+  static Future<void> show(BuildContext context, String message, [AlertOptions? options]) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -53,10 +60,10 @@ class Success {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('CLOSE'),
-              onPressed: () {
+              onPressed: options?.onPressed ?? () {
                 Navigator.of(context).pop();
               },
+              child: Text(options?.buttonText ?? 'CLOSE'),
             ),
           ],
         );
