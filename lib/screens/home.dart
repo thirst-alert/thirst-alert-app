@@ -29,7 +29,7 @@ class HomeScreenState extends State<HomeScreen> {
     return await storage.read(key: 'username');
   }
 
-  late List<Sensor>? mySensors;
+  List<Sensor> mySensors = [];
 
   @override
   void initState() {
@@ -60,6 +60,9 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (mySensors == null) {
+      // this should actually only render while a "loading" variable is true.
+      // if !loading && mySensors.isEmpty() then show something like
+      // "Add a new sensor using the plus button below!"
       return const Center(child: CircularProgressIndicator());
     }
 
