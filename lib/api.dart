@@ -155,4 +155,12 @@ class Api {
   Future<ApiResponse<dynamic>> deleteSensor(String sensorId) async {
     return await _standardizeResponse(dio.delete('/sensor/$sensorId'));
   }
+
+  Future<ApiResponse<dynamic>> getSensors() async {
+    return await _standardizeResponse(dio.get('/sensor'));
+  }
+  
+  Future<ApiResponse<dynamic>> viewSensor(String sensorId) async {
+    return await _standardizeResponse(dio.get('/sensor/$sensorId'));
+  }
 }
