@@ -163,4 +163,8 @@ class Api {
   Future<ApiResponse<dynamic>> viewSensor(String sensorId) async {
     return await _standardizeResponse(dio.get('/sensor/$sensorId'));
   }
+
+  Future<ApiResponse<dynamic>> getMeasurements(String sensorId) async {
+    return await _standardizeResponse(dio.get('/measurement/$sensorId'));
+  }
 }

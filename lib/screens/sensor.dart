@@ -1,11 +1,11 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import '../api.dart';
+import '../theme.dart';
 // import 'alert.dart';
 import 'home.dart';
-import '../theme.dart';
 import 'information.dart';
+import 'sensor/measurement.dart';
 
 class SensorScreen extends StatefulWidget {
   const SensorScreen({super.key});
@@ -66,7 +66,7 @@ class SensorScreenState extends State<SensorScreen> {
               children: [
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(30, 30, 0, 0),
+                    padding: const EdgeInsets.fromLTRB(20, 30, 0, 0),
                     child: TextField(
                       controller: _nameController,
                       decoration: InputDecoration(
@@ -151,9 +151,12 @@ class SensorScreenState extends State<SensorScreen> {
                 ],
               ),
             ),
-            
-            const SizedBox(height: 40),
-            const Text('PUT CHART HERE'),
+
+            const Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: SensorChart(),
+              ),
+
             const SizedBox(height: 40),
 
             TextButton(
