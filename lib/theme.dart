@@ -71,6 +71,7 @@ final ThemeData myTheme = ThemeData(
         fontSize: 14.0,
       ),     
       labelStyle: GoogleFonts.inter(fontSize: 14, color: text),
+      hintStyle: GoogleFonts.inter(color: text),
       filled: true,
       fillColor: surface,
       contentPadding: const EdgeInsets.fromLTRB(45, 15, 45, 15),

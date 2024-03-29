@@ -6,6 +6,7 @@ import 'screens/register.dart';
 import 'screens/home.dart';
 import 'screens/user.dart';
 import 'screens/information.dart';
+import 'screens/sensor.dart';
 import 'screens/sensor/start.dart';
 
 Future main() async {
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/user': (context) => const UserScreen(),
         '/information': (context) => InformationScreen(0),
+        '/viewSensor': (context) => SensorScreen(),
         '/sensor/start': (context) => const SensorStart(),
       },
     );
