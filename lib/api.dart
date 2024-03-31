@@ -1,11 +1,15 @@
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'identity_manager.dart';
 
 final unauthenticatedRoutes = ['/auth/register', '/auth/login', '/auth/refresh', '/auth/verify'
 ];
-const storage = FlutterSecureStorage();
+
+final identityManager = IdentityManager();
 
 Dio dio = Dio(BaseOptions(
   baseUrl: dotenv.env['BASE_URL'] as String,
@@ -14,9 +18,8 @@ Dio dio = Dio(BaseOptions(
   // ADD ACCESS TOKEN TO REQUEST
   onRequest: (options, handler) async {
     if (unauthenticatedRoutes.contains(options.path)) return handler.next(options);
-    if (await storage.containsKey(key: 'access_token')) {
-      final accessToken = await storage.read(key: 'access_token');
-      options.headers['Authorization'] = 'Bearer $accessToken';
+    if (identityManager.accessToken != null) {
+      options.headers['Authorization'] = 'Bearer ${identityManager.accessToken}';
       handler.next(options);
     } else {
       // REDIRECT TO LOGIN SCREEN
@@ -27,9 +30,8 @@ Dio dio = Dio(BaseOptions(
     if (unauthenticatedRoutes.contains(request.path)) return handler.next(error);
     if (error.response?.statusCode == 401) {
       try {
-        final refreshToken = await storage.read(key: 'refresh_token');
-        if (refreshToken != null) {
-          final newAccessToken = await _getNewAccessToken(refreshToken);
+        if (identityManager.refreshToken != null) {
+          final newAccessToken = await _getNewAccessToken();
           request.headers['Authorization'] = 'Bearer $newAccessToken';
           return handler.resolve(await _retry(request));
         } else {
@@ -40,8 +42,8 @@ Dio dio = Dio(BaseOptions(
       }
     }
   }
-))
-..interceptors.add(PrettyDioLogger());
+));
+// ..interceptors.add(PrettyDioLogger());
 
 class ApiResponse<T> {
   final bool success;
@@ -89,14 +91,13 @@ Future<ApiResponse<T>> _standardizeResponse<T>(Future<Response<T>> responseFutur
   }
 }
 
-Future<String> _getNewAccessToken(String refreshToken) async {
-  final username = await storage.read(key: 'username');
+Future<String> _getNewAccessToken() async {
   final response = await _standardizeResponse(dio.post('/auth/refresh', data: {
-    'refreshToken': refreshToken,
-    'username': username
+    'refreshToken': identityManager.refreshToken,
+    'username': identityManager.username
   }));
   if (response.success) {
-    await storage.write(key: 'access_token', value: response.data['token']);
+    identityManager.accessToken = response.data['token'];
     return response.data['token'];
   } else {
     throw Exception('Failed to refresh access token');
@@ -121,9 +122,11 @@ class Api {
   Future<ApiResponse<dynamic>> login(Map<String, dynamic> body) async {
     final response = await _standardizeResponse(dio.post('/auth/login', data: body));
     if (response.success) {
-      await storage.write(key: 'access_token', value: response.data['token']);
-      await storage.write(key: 'refresh_token', value: response.data['refreshToken']);
-      await storage.write(key: 'username', value: response.data['user']['username']);
+      identityManager.accessToken = response.data['token'];
+      identityManager.refreshToken = response.data['refreshToken'];
+      identityManager.username = response.data['user']['username'];
+      identityManager.userId = response.data['user']['id'];
+      identityManager.email = response.data['user']['email'];
     }
     return response;
   }
@@ -162,5 +165,40 @@ class Api {
   
   Future<ApiResponse<dynamic>> viewSensor(String sensorId) async {
     return await _standardizeResponse(dio.get('/sensor/$sensorId'));
+  }
+
+  Future<ApiResponse<dynamic>> patchSensor(String sensorId, Map<String, dynamic> body) async {
+    return await _standardizeResponse(dio.patch('/sensor/$sensorId', data: body));
+  }
+
+  Future<bool> downloadSensorImage(String userId, String sensorId) async {
+    final ApiResponse<dynamic> response = await _standardizeResponse(dio.get('/gcs/sensor/$sensorId'));
+    if (!response.success) return false;
+    try {
+      final String url = response.data['url'];
+      final Directory appDocumentsDir = await getApplicationDocumentsDirectory();
+      final File file = File('${appDocumentsDir.path}/$userId-$sensorId');
+      final Dio gcsDio = Dio();
+      await gcsDio.download(url, file.path);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> uploadSensorImage(String userId, String sensorId) async {
+    final ApiResponse<dynamic> response = await _standardizeResponse(dio.put('/gcs/sensor/$sensorId'));
+    if (!response.success) return false;
+    try {
+      final String url = response.data['url'];
+      final File image = File('${(await getApplicationDocumentsDirectory()).path}/$userId-$sensorId');
+      final FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(image.path, filename: '$userId-$sensorId'),
+      });
+      await dio.put(url, data: formData);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
