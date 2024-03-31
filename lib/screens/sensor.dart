@@ -6,9 +6,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import '../api.dart';
 import 'alert.dart';
-import 'home.dart';
 import '../theme.dart';
+import 'home.dart';
 import 'information.dart';
+import 'sensor/measurement.dart';
 
 const AssetImage defaultImage = AssetImage('lib/assets/b.jpg');
 late Directory appDocumentsDir;
@@ -89,7 +90,7 @@ class SensorScreenState extends State<SensorScreen> {
               children: [
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(30, 30, 0, 0),
+                    padding: const EdgeInsets.fromLTRB(20, 30, 0, 0),
                     child: TextField(
                       controller: _nameController,
                       decoration: InputDecoration(
@@ -147,36 +148,12 @@ class SensorScreenState extends State<SensorScreen> {
               ],
             ),
 
-            const SizedBox(height: 20),
-
-            const Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 30),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Temperature'),
-                      // ADD FUNCTIONALITY
-                      Text('15 °C'),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Moisture'),
-                      // ADD FUNCTIONALITY
-                      Text('50 %'),
-                    ],
-                  ),
-                ],
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              ////
+              child: SensorChart(sensorId: sensor.sensorId),
               ),
-            ),
-            
-            const SizedBox(height: 40),
-            const Text('PUT CHART HERE'),
+
             const SizedBox(height: 40),
 
             TextButton(

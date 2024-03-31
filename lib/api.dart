@@ -200,5 +200,13 @@ class Api {
     } catch (e) {
       return false;
     }
+
+  Future<ApiResponse<dynamic>> getMeasurements(String sensorId) async {
+    return await _standardizeResponse(dio.get('/measurement/$sensorId', queryParameters: {
+      //'limit': 31,
+      'offset': 12,
+      'sort': -1,
+      //'startDate': '2024-02-18T17:35:17.206+00:00',
+    }));
   }
 }
