@@ -124,37 +124,10 @@ class SensorScreenState extends State<SensorScreen> {
               ],
             ),
 
-            const SizedBox(height: 20),
-
-            const Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 30),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Temperature'),
-                      // ADD FUNCTIONALITY
-                      Text('15 °C'),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Moisture'),
-                      // ADD FUNCTIONALITY
-                      Text('50 %'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const Padding(
-              padding: EdgeInsets.only(top: 10),
-              child: SensorChart(),
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              ////
+              child: SensorChart(sensorId: sensor.sensorId),
               ),
 
             const SizedBox(height: 40),

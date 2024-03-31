@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import '../../theme.dart';
+import '../../api.dart';
+
+class Measurement {
+  final int moisture;
+  final double temperature;
+  final String date;
+  Measurement(
+      {required this.moisture, required this.temperature, required this.date,
+  });
+}
 
 class _LineChart extends StatelessWidget {
-  const _LineChart({required this.defaultView});
 
+  final String sensorId;
   final bool defaultView;
+  final List<Measurement> measurements;
+
+  const _LineChart({required this.defaultView, required this.sensorId, required this.measurements});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +34,8 @@ class _LineChart extends StatelessWidget {
         lineBarsData: lineBarsData,
         minX: 0,
         maxX: 8,
+        minY: 20,
+        maxY: 120,
         rangeAnnotations: RangeAnnotations(
           horizontalRangeAnnotations: [
             HorizontalRangeAnnotation(
@@ -38,7 +54,9 @@ class _LineChart extends StatelessWidget {
         borderData: borderData,
         lineBarsData: lineBarsData,
         minX: 0,
-        maxX: 31,
+        maxX: 32,
+        minY: 20,
+        maxY: 120,
         rangeAnnotations: RangeAnnotations(
           horizontalRangeAnnotations: [
             HorizontalRangeAnnotation(
@@ -74,87 +92,91 @@ class _LineChart extends StatelessWidget {
 
   List<LineChartBarData> get lineBarsData => [lineChartBarData];
 
-  Widget bottomTitleWidgets(double value, TitleMeta meta) {
-    const style = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 14,
+  Widget bottomTitleWidgetsWeek(double value, TitleMeta meta) {
+    final index = value.toInt();
+    if (measurements.isEmpty || index < 0 || index >= measurements.length) return const SizedBox();
+    final dateString = measurements[index].date;
+    final date = DateTime.parse(dateString);
+    final day = date.day.toString();
+    final month = date.month.toString();
+
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 5,
+      child: Text('$day/$month',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
     );
-    Widget text;
+  }
+
+  Widget bottomTitleWidgetsMonth(double value, TitleMeta meta) {
+final firstDateString = measurements[0].date;
+    final lastDateString = measurements[measurements.length - 1].date;
+
+    final firstDate = DateTime.parse(firstDateString);
+    final lastDate = DateTime.parse(lastDateString);
+
+    final fromDate = DateFormat('dd MMMM').format(firstDate);
+    final toDate = DateFormat('dd MMMM').format(lastDate);
+
+    String text = '';
     switch (value.toInt()) {
-      case 1:
-        text = const Text('MON', style: style);
-        break;
-      case 2:
-        text = const Text('TUE', style: style);
-        break;
-      case 3:
-        text = const Text('WED', style: style);
-        break;
-      case 4:
-        text = const Text('THU', style: style);
-        break;
-      case 5:
-        text = const Text('FRI', style: style);
-        break;
-      case 6:
-        text = const Text('SAT', style: style);
-        break;
-      case 7:
-        text = const Text('SUN', style: style);
-        break;
-      default:
-        text = const Text('');
+      case 16:
+        text = '$fromDate - $toDate';
         break;
     }
 
     return SideTitleWidget(
       axisSide: meta.axisSide,
       space: 5,
-      child: text,
+      child: Text(text,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
     );
   }
 
-  SideTitles get bottomTitles => SideTitles(
-        showTitles: true,
+  SideTitles get bottomTitles => SideTitles(    
         interval: 1,
-        getTitlesWidget: bottomTitleWidgets,
+        showTitles: true,
+        getTitlesWidget: defaultView ? bottomTitleWidgetsWeek : bottomTitleWidgetsMonth
       );
 
   FlGridData get gridData => const FlGridData(show: false);
 
   FlBorderData get borderData => FlBorderData(
         show: true,
-        border: Border(
-          bottom: BorderSide(color: accent.withOpacity(0.2), width: 4),
-          left: const BorderSide(color: Colors.transparent),
-          right: const BorderSide(color: Colors.transparent),
-          top: const BorderSide(color: Colors.transparent),
+        border: const Border(
+          bottom: BorderSide(color: secondary),
         ),
       );
 
-  LineChartBarData get lineChartBarData => LineChartBarData(
-        isCurved: true,
-        curveSmoothness: 0.3,
-        color: accent.withOpacity(0.5),
-        barWidth: 2,
-        isStrokeCapRound: true,
-        dotData: const FlDotData(show: true),
-        belowBarData: BarAreaData(show: false),
-        spots: const [
-          FlSpot(0, 45),
-          FlSpot(1, 40),
-          FlSpot(2, 50),
-          FlSpot(3, 60),
-          FlSpot(4, 65),
-          FlSpot(5, 80),
-          FlSpot(6, 105),
-          FlSpot(7, 85),
-        ],
-      );
+LineChartBarData get lineChartBarData {
+    List<FlSpot> spots = [];
+    if (defaultView) {
+      for (int i = 0; i < 8 && i < measurements.length; i ++) {
+        spots.add(FlSpot(i.toDouble(), measurements[i].moisture.toDouble()));
+      }
+    } else {
+      for (int i = 0; i < measurements.length; i ++) {
+        spots.add(FlSpot(i.toDouble(), measurements[i].moisture.toDouble()));
+      }
+    }
+
+    return LineChartBarData(
+      isCurved: true,
+      curveSmoothness: 0.3,
+      color: accent,
+      barWidth: 2,
+      isStrokeCapRound: true,
+      dotData: FlDotData(show: defaultView ? true : false),
+      belowBarData: BarAreaData(show: false),
+      spots: spots,
+    );
+  }
 }
 
 class SensorChart extends StatefulWidget {
-  const SensorChart({super.key});
+
+  final String sensorId;
+  const SensorChart({super.key, required this.sensorId});
 
   @override
   State<StatefulWidget> createState() => SensorChartState();
@@ -163,19 +185,71 @@ class SensorChart extends StatefulWidget {
 class SensorChartState extends State<SensorChart> {
 
   late bool defaultView;
+  List<Measurement> myMeasurements = [];
 
   @override
   void initState() {
     super.initState();
     defaultView = true;
+    fetchData();
+  }
+
+  Api api = Api();
+  
+  Future<void> fetchData() async {
+    api.getMeasurements(widget.sensorId).then((response) {
+      if (response.success) {
+        final measurementData = response.data;
+        setState(() {
+          myMeasurements = List<Measurement>.from(measurementData['measurements'].map((measurement) =>
+            Measurement(moisture: measurement['moisture'], temperature: measurement['temperature'], date: measurement['createdAt'])));
+        });
+      } else {
+      }
+    }).catchError((error) {
+      setState(() {
+        print(error);
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+
+    double latestTemperature = 0.0; 
+    int latestMoisture = 0;
+
+    if (myMeasurements.isNotEmpty) {
+      latestTemperature = myMeasurements[0].temperature;
+      latestMoisture = myMeasurements[0].moisture;
+    }
+
     return AspectRatio(
       aspectRatio: 1.23,
       child: Column(children: <Widget>[
-        Expanded(child: _LineChart(defaultView: defaultView)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Temperature'),
+                  Text('$latestTemperature °C'),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Moisture'),
+                  Text('$latestMoisture %'),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Expanded(child: _LineChart(defaultView: defaultView, sensorId: widget.sensorId, measurements: myMeasurements)),
         const SizedBox(
           height: 30,
         ),
