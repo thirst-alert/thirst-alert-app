@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thirst_alert/theme.dart';
 import '../api.dart';
 import 'alert.dart';
+import 'package:thirst_alert/screens/sensor.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,22 +13,32 @@ class HomeScreen extends StatefulWidget {
 
 class Sensor {
   final String sensorId;
-  final String name;
-  // final String img;
-  final bool active;
-  Sensor(
-      {required this.sensorId,
-      required this.name,
-      // required this.img,
-      this.active = true});
+  String name;
+  int thirstLevel;
+  bool hasCustomImage;
+  bool active;
+
+  factory Sensor.fromMap(Map<String, dynamic> sensor) {
+    return Sensor(
+      sensorId: sensor['id'],
+      name: sensor['name'],
+      thirstLevel: sensor['thirstLevel'],
+      active: sensor['active'],
+      hasCustomImage: sensor['hasCustomImage'],
+    );
+  }
+  
+  Sensor({
+    required this.sensorId,
+    required this.name,
+    required this.thirstLevel,
+    required this.hasCustomImage,
+    required this.active
+  });
 }
 
 class HomeScreenState extends State<HomeScreen> {
   Api api = Api();
-
-  Future<String?> _getUserName() async {
-    return await storage.read(key: 'username');
-  }
 
   List<Sensor> mySensors = [];
 
@@ -43,7 +54,7 @@ class HomeScreenState extends State<HomeScreen> {
         final sensorsData = response.data;
         setState(() {
           mySensors = List<Sensor>.from(sensorsData['sensors'].map((sensor) =>
-              Sensor(sensorId: sensor['id'], name: sensor['name'])));
+              Sensor.fromMap(sensor)));
         });
       } else {
         String errorMessage = response.error ?? 'An unknown error occurred.';
@@ -68,13 +79,7 @@ class HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: FutureBuilder<String?>(
-          future: _getUserName(),
-          builder: (context, snapshot) {
-            final username = snapshot.data ?? '';
-            return Text('Hello, $username');
-          },
-        ),
+        title: Text('Hello, ${identityManager.username ?? ''}'),
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
@@ -175,25 +180,29 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   void onViewSensor(Sensor sensor) async {
-    api.viewSensor(sensor.sensorId).then((response) {
-      if (response.success) {
-        Navigator.pushNamed(
-          context,
-          '/viewSensor',
-          arguments: {
-            'sensor': sensor
-          },
-        );
-      } else {
-        String errorMessage = response.error ?? 'An unknown error occurred.';
-        Error.show(context, errorMessage);
-      }
-    });
+    // api.viewSensor(sensor.sensorId).then((response) {
+    //   if (response.success) {
+    //     Navigator.pushNamed(
+    //       context,
+    //       '/viewSensor',
+    //       arguments: {
+    //         'sensor': sensor
+    //       },
+    //     );
+    //   } else {
+    //     String errorMessage = response.error ?? 'An unknown error occurred.';
+    //     Error.show(context, errorMessage);
+    //   }
+    // });
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SensorScreen(sensor: sensor)),
+    );
   }
 
   void onLogout() {
     try {
-      storage.deleteAll();
+      identityManager.clearUserData();
       Navigator.pushNamed(context, '/');
       Success.show(context, 'Logged out successfully');
     } catch (e) {
