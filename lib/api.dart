@@ -42,8 +42,8 @@ Dio dio = Dio(BaseOptions(
       }
     }
   }
-));
-// ..interceptors.add(PrettyDioLogger());
+))
+..interceptors.add(PrettyDioLogger());
 
 class ApiResponse<T> {
   final bool success;
@@ -200,6 +200,7 @@ class Api {
     } catch (e) {
       return false;
     }
+  }
 
   Future<ApiResponse<dynamic>> getMeasurements(String sensorId) async {
     return await _standardizeResponse(dio.get('/measurement/$sensorId', queryParameters: {
