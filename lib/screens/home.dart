@@ -3,38 +3,13 @@ import 'package:thirst_alert/theme.dart';
 import '../api.dart';
 import 'alert.dart';
 import 'package:thirst_alert/screens/sensor.dart';
+import 'package:thirst_alert/sensor_manager.dart' show Sensor;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
   HomeScreenState createState() => HomeScreenState();
-}
-
-class Sensor {
-  final String sensorId;
-  String name;
-  int thirstLevel;
-  bool hasCustomImage;
-  bool active;
-
-  factory Sensor.fromMap(Map<String, dynamic> sensor) {
-    return Sensor(
-      sensorId: sensor['id'],
-      name: sensor['name'],
-      thirstLevel: sensor['thirstLevel'],
-      active: sensor['active'],
-      hasCustomImage: sensor['hasCustomImage'],
-    );
-  }
-  
-  Sensor({
-    required this.sensorId,
-    required this.name,
-    required this.thirstLevel,
-    required this.hasCustomImage,
-    required this.active
-  });
 }
 
 class HomeScreenState extends State<HomeScreen> {
@@ -49,12 +24,16 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchData() async {
+    await Sensor.initDocumentsDir();
+
     api.getSensors().then((response) {
       if (response.success) {
         final sensorsData = response.data;
         setState(() {
           mySensors = List<Sensor>.from(sensorsData['sensors'].map((sensor) =>
-              Sensor.fromMap(sensor)));
+              Sensor.fromMap(sensor, () {
+                setState(() {});
+              })));
         });
       } else {
         String errorMessage = response.error ?? 'An unknown error occurred.';
@@ -116,42 +95,36 @@ class HomeScreenState extends State<HomeScreen> {
                         onViewSensor(sensor);
                       },
                       child: SizedBox(
-                          height: 180.0,
-                          child: Card(
-                              elevation: 3,
-                              // shape: RoundedRectangleBorder(
-                              //   borderRadius: BorderRadius.circular(16.0),
-                              // ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16.0),
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      child: Image.asset(
-                                              'lib/assets/b.jpg', // Path to default image
-                                              fit: BoxFit.cover,
-                                            ),
-                                    ),
-                                    // Expanded(
-                                    //   child: sensor.img.isNotEmpty
-                                    //               ? Image.asset(
-                                    //                   sensor.img,
-                                    //                   fit: BoxFit.cover,
-                                    //                 )
-                                    //               : Image.asset(
-                                    //                  'lib/assets/b.jpg', // Path to default image
-                                    //                   fit: BoxFit.cover,
-                                    //                 ),
-                                    //         ),
-                                    ListTile(
-                                      title: Text(sensor.name),
-                                      trailing: sensor.active == true 
-                                      ? const Icon(Icons.favorite, color: accent) 
-                                      : const Icon(Icons.water_drop, color: attention),
-                                    ),
-                                  ],
-                                ),
-                              ))));
+                        child: Card(
+                        elevation: 3,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.0),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: sensor.isImageLoading
+                                  ? const Center(child: CircularProgressIndicator())
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image: sensor.image,
+                                          fit: BoxFit.cover
+                                        ),
+                                      ),
+                                    )
+                              ),
+                              ListTile(
+                                title: Text(sensor.name),
+                                trailing: sensor.active == true 
+                                ? const Icon(Icons.favorite, color: accent) 
+                                : const Icon(Icons.water_drop, color: attention),
+                              ),
+                            ],
+                          ),
+                        )
+                      )
+                    )
+                  );
                 },
               ),
             ),
@@ -180,20 +153,6 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   void onViewSensor(Sensor sensor) async {
-    // api.viewSensor(sensor.sensorId).then((response) {
-    //   if (response.success) {
-    //     Navigator.pushNamed(
-    //       context,
-    //       '/viewSensor',
-    //       arguments: {
-    //         'sensor': sensor
-    //       },
-    //     );
-    //   } else {
-    //     String errorMessage = response.error ?? 'An unknown error occurred.';
-    //     Error.show(context, errorMessage);
-    //   }
-    // });
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => SensorScreen(sensor: sensor)),
