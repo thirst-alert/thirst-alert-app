@@ -186,16 +186,23 @@ class Api {
     }
   }
 
-  Future<bool> uploadSensorImage(String userId, String sensorId) async {
+  Future<bool> uploadSensorImage(String userId, String sensorId, String mimeType) async {
     final ApiResponse<dynamic> response = await _standardizeResponse(dio.put('/gcs/sensor/$sensorId'));
     if (!response.success) return false;
     try {
       final String url = response.data['url'];
       final File image = File('${(await getApplicationDocumentsDirectory()).path}/$userId-$sensorId');
-      final FormData formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(image.path, filename: '$userId-$sensorId'),
-      });
-      await dio.put(url, data: formData);
+      final Dio gcsDio = Dio();
+      await gcsDio.put(
+        url,
+        data: image.openRead(),
+        options: Options(
+          headers: {
+            HttpHeaders.contentTypeHeader: mimeType,
+            HttpHeaders.contentLengthHeader: image.lengthSync()
+          }
+        )
+      );
       return true;
     } catch (e) {
       return false;

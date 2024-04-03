@@ -6,7 +6,7 @@ import 'screens/register.dart';
 import 'screens/home.dart';
 import 'screens/user.dart';
 import 'screens/information.dart';
-import 'screens/sensor.dart';
+// import 'screens/sensor.dart';
 import 'screens/sensor/start.dart';
 
 Future main() async {
