@@ -3,6 +3,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart'; 
 
 import 'identity_manager.dart';
 
@@ -209,12 +210,23 @@ class Api {
     }
   }
 
-  Future<ApiResponse<dynamic>> getMeasurements(String sensorId) async {
+  Future<ApiResponse<dynamic>> getMeasurementsWeek(String sensorId) async {
+    DateTime weekAgo = DateTime.now().subtract(const Duration(days: 43)); // change to 7
+    String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(weekAgo);
     return await _standardizeResponse(dio.get('/measurement/$sensorId', queryParameters: {
-      //'limit': 31,
-      'offset': 12,
-      'sort': -1,
-      //'startDate': '2024-02-18T17:35:17.206+00:00',
+      'limit' : 384, // 8 days, although, shouldn't be necessary
+      'sort': 1,
+      'startDate': formattedDate,
+    }));
+  }
+
+  Future<ApiResponse<dynamic>> getMeasurementsMonth(String sensorId) async {
+    DateTime monthAgo = DateTime.now().subtract(const Duration(days: 45)); // change to 31
+    String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(monthAgo);
+    return await _standardizeResponse(
+      dio.get('/measurement/$sensorId', queryParameters: {
+      'sort': 1,
+      'startDate': formattedDate,
     }));
   }
 }

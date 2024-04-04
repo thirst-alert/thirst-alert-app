@@ -1,3 +1,4 @@
+//import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -5,7 +6,7 @@ import '../../theme.dart';
 import '../../api.dart';
 
 class Measurement {
-  final int moisture;
+  final double moisture;
   final double temperature;
   final String date;
   Measurement(
@@ -17,9 +18,10 @@ class _LineChart extends StatelessWidget {
 
   final String sensorId;
   final bool defaultView;
-  final List<Measurement> measurements;
+  final List<Measurement> measurementsWeek;
+  final List<Measurement> measurementsMonth;
 
-  const _LineChart({required this.defaultView, required this.sensorId, required this.measurements});
+  const _LineChart({required this.defaultView, required this.sensorId, required this.measurementsMonth, required this.measurementsWeek});
 
   @override
   Widget build(BuildContext context) {
@@ -94,8 +96,8 @@ class _LineChart extends StatelessWidget {
 
   Widget bottomTitleWidgetsWeek(double value, TitleMeta meta) {
     final index = value.toInt();
-    if (measurements.isEmpty || index < 0 || index >= measurements.length) return const SizedBox();
-    final dateString = measurements[index].date;
+    if (measurementsWeek.isEmpty || index == 0 || index >= measurementsWeek.length) return const SizedBox();
+    final dateString = measurementsWeek[index].date;
     final date = DateTime.parse(dateString);
     final day = date.day.toString();
     final month = date.month.toString();
@@ -109,8 +111,9 @@ class _LineChart extends StatelessWidget {
   }
 
   Widget bottomTitleWidgetsMonth(double value, TitleMeta meta) {
-final firstDateString = measurements[0].date;
-    final lastDateString = measurements[measurements.length - 1].date;
+    if (measurementsMonth.isEmpty) return const SizedBox();
+    final firstDateString = measurementsMonth[0].date;
+    final lastDateString = measurementsMonth[measurementsMonth.length - 1].date;
 
     final firstDate = DateTime.parse(firstDateString);
     final lastDate = DateTime.parse(lastDateString);
@@ -151,12 +154,12 @@ final firstDateString = measurements[0].date;
 LineChartBarData get lineChartBarData {
     List<FlSpot> spots = [];
     if (defaultView) {
-      for (int i = 0; i < 8 && i < measurements.length; i ++) {
-        spots.add(FlSpot(i.toDouble(), measurements[i].moisture.toDouble()));
+      for (int i = 0; i < measurementsWeek.length; i ++) {
+        spots.add(FlSpot(i.toDouble(), measurementsWeek[i].moisture.toDouble()));
       }
     } else {
-      for (int i = 0; i < measurements.length; i ++) {
-        spots.add(FlSpot(i.toDouble(), measurements[i].moisture.toDouble()));
+      for (int i = 0; i < measurementsMonth.length; i ++) {
+        spots.add(FlSpot(i.toDouble(), measurementsMonth[i].moisture.toDouble()));
       }
     }
 
@@ -185,43 +188,60 @@ class SensorChart extends StatefulWidget {
 class SensorChartState extends State<SensorChart> {
 
   late bool defaultView;
-  List<Measurement> myMeasurements = [];
+  List<Measurement> measurementsWeek = [];
+  List<Measurement> measurementsMonth = [];
 
   @override
   void initState() {
     super.initState();
     defaultView = true;
-    fetchData();
+    fetchDataWeek();
+    fetchDataMonth();
   }
 
   Api api = Api();
-  
-  Future<void> fetchData() async {
-    api.getMeasurements(widget.sensorId).then((response) {
+
+  Future<void> fetchDataWeek() async {
+    api.getMeasurementsWeek(widget.sensorId).then((response) {
       if (response.success) {
-        final measurementData = response.data;
+        final measurementWeekData = response.data;
         setState(() {
-          myMeasurements = List<Measurement>.from(measurementData['measurements'].map((measurement) =>
-            Measurement(moisture: measurement['moisture'], temperature: measurement['temperature'], date: measurement['createdAt'])));
+          measurementsWeek = List<Measurement>.from(
+              measurementWeekData['measurements'].map((measurement) =>
+                  Measurement(
+                      moisture: measurement['moisture'],
+                      temperature: measurement['temperature'],
+                      date: measurement['createdAt'])));
         });
-      } else {
-      }
-    }).catchError((error) {
-      setState(() {
-        print(error);
-      });
-    });
+      } else {}
+    }).catchError((error) {});
+  }
+  
+  Future<void> fetchDataMonth() async {
+    api.getMeasurementsMonth(widget.sensorId).then((response) {
+      if (response.success) {
+        final measurementMonthData = response.data;
+        setState(() {
+          measurementsMonth = List<Measurement>.from(
+              measurementMonthData['measurements'].map((measurement) =>
+                  Measurement(
+                      moisture: measurement['moisture'],
+                      temperature: measurement['temperature'],
+                      date: measurement['createdAt'])));
+        });
+      } else {}
+    }).catchError((error) {});
   }
 
   @override
   Widget build(BuildContext context) {
 
     double latestTemperature = 0.0; 
-    int latestMoisture = 0;
+    double latestMoisture = 0.0;
 
-    if (myMeasurements.isNotEmpty) {
-      latestTemperature = myMeasurements[0].temperature;
-      latestMoisture = myMeasurements[0].moisture;
+    if (measurementsWeek.isNotEmpty) {
+      latestTemperature = measurementsWeek[measurementsWeek.length - 1].temperature;
+      latestMoisture = measurementsWeek[measurementsWeek.length - 1].moisture;
     }
 
     return AspectRatio(
@@ -243,13 +263,13 @@ class SensorChartState extends State<SensorChart> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Moisture'),
-                  Text('$latestMoisture %'),
+                  Text('$latestMoisture %'), // WHAT's THIS UNIT? (% ?)
                 ],
               ),
             ],
           ),
         ),
-        Expanded(child: _LineChart(defaultView: defaultView, sensorId: widget.sensorId, measurements: myMeasurements)),
+        Expanded(child: _LineChart(defaultView: defaultView, sensorId: widget.sensorId, measurementsWeek: measurementsWeek, measurementsMonth: measurementsMonth)),
         const SizedBox(
           height: 30,
         ),
