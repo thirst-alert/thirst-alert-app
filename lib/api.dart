@@ -43,8 +43,8 @@ Dio dio = Dio(BaseOptions(
       }
     }
   }
-))
-..interceptors.add(PrettyDioLogger());
+));
+// ..interceptors.add(PrettyDioLogger());
 
 class ApiResponse<T> {
   final bool success;
@@ -211,7 +211,7 @@ class Api {
   }
 
   Future<ApiResponse<dynamic>> getMeasurementsWeek(String sensorId) async {
-    DateTime weekAgo = DateTime.now().subtract(const Duration(days: 43)); // change to 7
+    DateTime weekAgo = DateTime.now().subtract(const Duration(days: 7)); // change to 7
     String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(weekAgo);
     return await _standardizeResponse(dio.get('/measurement/$sensorId', queryParameters: {
       'limit' : 384, // 8 days, although, shouldn't be necessary
@@ -221,7 +221,7 @@ class Api {
   }
 
   Future<ApiResponse<dynamic>> getMeasurementsMonth(String sensorId) async {
-    DateTime monthAgo = DateTime.now().subtract(const Duration(days: 45)); // change to 31
+    DateTime monthAgo = DateTime.now().subtract(const Duration(days: 31)); // change to 31
     String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(monthAgo);
     return await _standardizeResponse(
       dio.get('/measurement/$sensorId', queryParameters: {

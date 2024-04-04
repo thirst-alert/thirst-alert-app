@@ -9,6 +9,15 @@ class Measurement {
   final double moisture;
   final double temperature;
   final String date;
+
+  factory Measurement.fromMap(Map<String, dynamic> measurement) {
+    return Measurement(
+      moisture: measurement['moisture'].toDouble(),
+      temperature: measurement['temperature'].toDouble(),
+      date: measurement['createdAt'],
+    );
+  }
+
   Measurement(
       {required this.moisture, required this.temperature, required this.date,
   });
@@ -188,8 +197,8 @@ class SensorChart extends StatefulWidget {
 class SensorChartState extends State<SensorChart> {
 
   late bool defaultView;
-  List<Measurement> measurementsWeek = [];
-  List<Measurement> measurementsMonth = [];
+  late List<Measurement> measurementsWeek = [];
+  late List<Measurement> measurementsMonth = [];
 
   @override
   void initState() {
@@ -208,10 +217,7 @@ class SensorChartState extends State<SensorChart> {
         setState(() {
           measurementsWeek = List<Measurement>.from(
               measurementWeekData['measurements'].map((measurement) =>
-                  Measurement(
-                      moisture: measurement['moisture'],
-                      temperature: measurement['temperature'],
-                      date: measurement['createdAt'])));
+                  Measurement.fromMap(measurement)));
         });
       } else {}
     }).catchError((error) {});
@@ -224,10 +230,7 @@ class SensorChartState extends State<SensorChart> {
         setState(() {
           measurementsMonth = List<Measurement>.from(
               measurementMonthData['measurements'].map((measurement) =>
-                  Measurement(
-                      moisture: measurement['moisture'],
-                      temperature: measurement['temperature'],
-                      date: measurement['createdAt'])));
+                  Measurement.fromMap(measurement)));
         });
       } else {}
     }).catchError((error) {});
@@ -235,7 +238,6 @@ class SensorChartState extends State<SensorChart> {
 
   @override
   Widget build(BuildContext context) {
-
     double latestTemperature = 0.0; 
     double latestMoisture = 0.0;
 
