@@ -17,6 +17,14 @@ class IdentityManager {
 
   IdentityManager._();
 
+  Future<void> initFromStorage() async {
+    _accessToken = await _storage.read(key: 'access_token');
+    _refreshToken = await _storage.read(key: 'refresh_token');
+    _username = await _storage.read(key: 'username');
+    _userId = await _storage.read(key: 'id');
+    _email = await _storage.read(key: 'email');
+  }
+
   String? get accessToken => _accessToken;
   String? get refreshToken => _refreshToken;
   String? get username => _username;

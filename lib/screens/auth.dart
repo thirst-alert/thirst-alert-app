@@ -19,110 +19,115 @@ class LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 150),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Image.asset(
-              'lib/assets/thirst-alert-logo.png',
-              height: 75.0,
-            ),
-
-            const SizedBox(height: 60),
-
-            TextField(
-              controller: _identityController,
-              decoration: const InputDecoration(
-                  label: Center(
-                  child: Text('USERNAME OR EMAIL'),  
-                ),
-                // errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 150),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Image.asset(
+                'lib/assets/thirst-alert-logo.png',
+                height: 75.0,
               ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 20),
-            
-            TextField(
-              controller: _passwordController,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                  label: const Center(
-                  child: Text('PASSWORD'),
+      
+              const SizedBox(height: 60),
+      
+              TextField(
+                controller: _identityController,
+                decoration: const InputDecoration(
+                    label: Center(
+                    child: Text('USERNAME OR EMAIL'),  
                   ),
-                  suffixIcon: IconButton(
-                    icon: Icon(_passwordIsObscured ? Icons.visibility : Icons.visibility_off),
-                    onPressed: () => setState(() {
-                      _passwordIsObscured = !_passwordIsObscured;
-                    }
-                  ),
+                  // errorText: _errorMessage.isNotEmpty ? _errorMessage : null,
                 ),
-                contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
+                textAlign: TextAlign.center,
+                textInputAction: TextInputAction.next
               ),
-              obscureText: _passwordIsObscured,
-            ),
-          ],
+      
+              const SizedBox(height: 20),
+              
+              TextField(
+                controller: _passwordController,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                    label: const Center(
+                    child: Text('PASSWORD'),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(_passwordIsObscured ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () => setState(() {
+                        _passwordIsObscured = !_passwordIsObscured;
+                      }
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
+                ),
+                obscureText: _passwordIsObscured,
+                onSubmitted: (_) => onLogin(),
+              ),
+            ],
+          ),
         ),
-      ),
-
-      floatingActionButton: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            ElevatedButton (
-              onPressed: onLogin,
-              child: const Text('LOGIN'),
+      
+        floatingActionButton: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton (
+                onPressed: onLogin,
+                child: const Text('LOGIN'),
+                ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: onRegister,
+                child: const Text('REGISTER'),
               ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: onRegister,
-              child: const Text('REGISTER'),
-            ),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      actionsAlignment: MainAxisAlignment.center,
-                      content: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              const SizedBox(height: 20),
-                              TextField(
-                                controller: _identityController,
-                                textAlign: TextAlign.center,
-                                decoration: const InputDecoration(
-                                  label: Center(
-                                    child: Text('ACCOUNT EMAIL'),)
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        actionsAlignment: MainAxisAlignment.center,
+                        content: SingleChildScrollView(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                const SizedBox(height: 20),
+                                TextField(
+                                  controller: _identityController,
+                                  textAlign: TextAlign.center,
+                                  decoration: const InputDecoration(
+                                    label: Center(
+                                      child: Text('ACCOUNT EMAIL'),)
+                                  ),
                                 ),
-                              ),
-                            ],
-                          )
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: onResetPassword,
-                          child: const Text('RESET PASSWORD'),
+                              ],
+                            )
                         ),
-                      ],
-                    );
-                  },
-                );
-              },
-              child: const Text('RESET MY PASSWORD'),
-            ),
-            const SizedBox(height: 20)
-          ],          
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: onResetPassword,
+                            child: const Text('RESET PASSWORD'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text('RESET MY PASSWORD'),
+              ),
+              const SizedBox(height: 20)
+            ],          
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      );
+    );
     }
 
   void onLogin() {
@@ -134,7 +139,7 @@ class LoginScreenState extends State<LoginScreen> {
           Navigator.pushNamed(context, '/home');
         } else {
           String errorMessage = response.error ?? 'An unknown error occurred';
-          if (errorMessage.contains('Forbidden: Email not verified')) {
+          if (errorMessage.contains('Email not verified')) {
             showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -151,6 +156,7 @@ class LoginScreenState extends State<LoginScreen> {
                         TextField(
                           controller: _verificationTokenController,
                           textAlign: TextAlign.center,
+                          onSubmitted: (_) => onVerify(),
                         ),
                       ]
                     )
@@ -170,14 +176,24 @@ class LoginScreenState extends State<LoginScreen> {
       });
     }
 
-  void onVerify() async {
+  void onVerify() {
     api.verify({
-      'token': _verificationTokenController.text,
-      'identity': _identityController.text,
+    'token': _verificationTokenController.text,
+    'identity': _identityController.text,
     }).then((response) {
       if (response.success) {
-        Navigator.pushNamed(context, '/home');
-        Success.show(context, 'Welcome to Thirst Alert!');
+        api.login({
+          'identity': _identityController.text,
+          'password': _passwordController.text,
+        }).then((response) {
+          if (response.success) {
+            Navigator.pushNamed(context, '/home');
+            Success.show(context, 'Welcome to Thirst Alert!');
+          } else {
+            String errorMessage = response.error ?? 'An unknown error occurred';
+            Error.show(context, errorMessage);
+          }
+        });
       } else {
         String errorMessage = response.error ?? 'An unknown verification error occurred';
         Error.show(context, errorMessage);

@@ -76,12 +76,14 @@ class RegisterScreenState extends State<RegisterScreen> {
                 ),
                 counterText: '',
               ),
+              textInputAction: TextInputAction.next
             ),
 
             const SizedBox(height: 20),
 
             TextField(
               controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
               onChanged: (text) {
                 _emailController.text = text.toLowerCase();
                 setState(() {
@@ -96,6 +98,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                 errorMaxLines: 2,
                 errorText: validEmail ? null : 'Please enter a valid email address',
               ),
+              textInputAction: TextInputAction.next
             ),
 
             const SizedBox(height: 20),
@@ -127,6 +130,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                 contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
               ),
               obscureText: _passwordIsObscured,
+              textInputAction: TextInputAction.next
             ),
 
             const SizedBox(height: 20),
@@ -149,6 +153,9 @@ class RegisterScreenState extends State<RegisterScreen> {
                 contentPadding: const EdgeInsets.fromLTRB(48, 16, 0, 16),
               ),
               obscureText: _passwordIsObscured,
+              onSubmitted: (_) {
+                if (validEmail && validPassword) return onRegister();
+              },
             ),
             const SizedBox(height: 350),
           ],
@@ -219,6 +226,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                     TextField(
                       controller: _verificationTokenController,
                       textAlign: TextAlign.center,
+                      onSubmitted: (_) => onVerify(),
                     ),
                   ],
                 )
@@ -245,8 +253,18 @@ class RegisterScreenState extends State<RegisterScreen> {
     'identity': _emailController.text,
     }).then((response) {
       if (response.success) {
-        Navigator.pushNamed(context, '/home');
-        Success.show(context, 'Welcome to Thirst Alert!');
+        api.login({
+          'identity': _emailController.text,
+          'password': _passwordController.text,
+        }).then((response) {
+          if (response.success) {
+            Navigator.pushNamed(context, '/home');
+            Success.show(context, 'Welcome to Thirst Alert!');
+          } else {
+            String errorMessage = response.error ?? 'An unknown error occurred';
+            Error.show(context, errorMessage);
+          }
+        });
       } else {
         String errorMessage = response.error ?? 'An unknown verification error occurred';
         Error.show(context, errorMessage);
