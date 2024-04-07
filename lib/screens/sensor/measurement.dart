@@ -1,4 +1,3 @@
-//import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -211,7 +210,7 @@ class SensorChartState extends State<SensorChart> {
   Api api = Api();
 
   Future<void> fetchDataWeek() async {
-    api.getMeasurementsWeek(widget.sensorId).then((response) {
+    api.getMeasurements(widget.sensorId, 'week').then((response) {
       if (response.success) {
         final measurementWeekData = response.data;
         setState(() {
@@ -224,7 +223,7 @@ class SensorChartState extends State<SensorChart> {
   }
   
   Future<void> fetchDataMonth() async {
-    api.getMeasurementsMonth(widget.sensorId).then((response) {
+    api.getMeasurements(widget.sensorId, 'month').then((response) {
       if (response.success) {
         final measurementMonthData = response.data;
         setState(() {

@@ -3,60 +3,61 @@ import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:intl/intl.dart'; 
+import 'package:thirst_alert/main.dart' show navigatorKey;
 
 import 'identity_manager.dart';
 
-final unauthenticatedRoutes = ['/auth/register', '/auth/login', '/auth/refresh', '/auth/verify'
-];
+final unauthenticatedRoutes = ['/auth/register', '/auth/login', '/auth/refresh', '/auth/verify'];
 
 final identityManager = IdentityManager();
 
 Dio dio = Dio(BaseOptions(
   baseUrl: dotenv.env['BASE_URL'] as String,
 ))
-..interceptors.add(InterceptorsWrapper(
-  // ADD ACCESS TOKEN TO REQUEST
-  onRequest: (options, handler) async {
-    if (unauthenticatedRoutes.contains(options.path)) return handler.next(options);
-    if (identityManager.accessToken != null) {
-      options.headers['Authorization'] = 'Bearer ${identityManager.accessToken}';
-      handler.next(options);
-    } else {
-      // REDIRECT TO LOGIN SCREEN
-    }
-  },
-  onError: (DioException error, handler) async {
-    final request = error.requestOptions;
-    if (unauthenticatedRoutes.contains(request.path)) return handler.next(error);
-    if (error.response?.statusCode == 401) {
-      try {
-        if (identityManager.refreshToken != null) {
-          final newAccessToken = await _getNewAccessToken();
-          request.headers['Authorization'] = 'Bearer $newAccessToken';
-          return handler.resolve(await _retry(request));
-        } else {
-          // SHOULD NEVER GET HERE, BUT REDIRECT TO LOGIN SCREEN
-        }
-      } catch (e) {
-        throw Exception('Failed to refresh access token');
+  ..interceptors.add(InterceptorsWrapper(
+    onRequest: (options, handler) async {
+      if (unauthenticatedRoutes.contains(options.path)) return handler.next(options);
+      if (identityManager.accessToken != null) {
+        options.headers['Authorization'] = 'Bearer ${identityManager.accessToken}';
       }
-    }
-  }
-));
-// ..interceptors.add(PrettyDioLogger());
+      handler.next(options);
+    },
+    onError: (DioException error, handler) async {
+      final request = error.requestOptions;
+      if (unauthenticatedRoutes.contains(request.path)) return handler.next(error);
+      if (error.response?.statusCode == 401) {
+        try {
+          if (identityManager.refreshToken != null) {
+            final newAccessToken = await _getNewAccessToken();
+            request.headers['Authorization'] = 'Bearer $newAccessToken';
+            return handler.resolve(await _retry(request));
+          } else {
+            // needs login again
+            identityManager.clearUserData();
+            navigatorKey.currentState?.pushNamed('/');
+          }
+        } catch (e) {
+          // needs login again
+          identityManager.clearUserData();
+          navigatorKey.currentState?.pushNamed('/');
+        }
+      }
+      return handler.next(error);
+    },
+  ))
+  ..interceptors.add(PrettyDioLogger());
 
 class ApiResponse<T> {
   final bool success;
   final int statusCode;
   final T? data;
-  final String? error;
+  final String error;
 
   ApiResponse({
     required this.success,
     required this.statusCode,
     this.data,
-    this.error,
+    this.error = '',
   });
 
   // debug
@@ -76,19 +77,17 @@ Future<ApiResponse<T>> _standardizeResponse<T>(Future<Response<T>> responseFutur
     );
   } catch (e) {
     if (e is DioException) {
-      final dioError = e;
       return ApiResponse<T>(
         success: false,
-        statusCode: dioError.response?.statusCode ?? -1,
-        error: dioError.response?.data['error']['message'] as String? ?? 'Unknown error',
-      );
-    } else {
-      return ApiResponse<T>(
-        success: false,
-        statusCode: -1,
-        error: e.toString(),
+        statusCode: e.response?.statusCode ?? -1,
+        error: e.response?.data?['error']?['message'] ?? 'Unknown error',
       );
     }
+    return ApiResponse<T>(
+      success: false,
+      statusCode: -1,
+      error: 'Unknown error',
+    );
   }
 }
 
@@ -98,8 +97,8 @@ Future<String> _getNewAccessToken() async {
     'username': identityManager.username
   }));
   if (response.success) {
-    identityManager.accessToken = response.data['token'];
-    return response.data['token'];
+    identityManager.accessToken = response.data!['token'];
+    return response.data!['token'];
   } else {
     throw Exception('Failed to refresh access token');
   }
@@ -110,7 +109,7 @@ Future<Response> _retry(RequestOptions request) async {
     method: request.method,
     headers: request.headers,
   );
-  final response =  await dio.request(
+  final response = await dio.request(
     request.path,
     data: request.data,
     queryParameters: request.queryParameters,
@@ -120,6 +119,10 @@ Future<Response> _retry(RequestOptions request) async {
 }
 
 class Api {
+  Future<ApiResponse<dynamic>> me() async {
+    return await _standardizeResponse(dio.get('/me'));
+  }
+
   Future<ApiResponse<dynamic>> login(Map<String, dynamic> body) async {
     final response = await _standardizeResponse(dio.post('/auth/login', data: body));
     if (response.success) {
@@ -210,23 +213,9 @@ class Api {
     }
   }
 
-  Future<ApiResponse<dynamic>> getMeasurementsWeek(String sensorId) async {
-    DateTime weekAgo = DateTime.now().subtract(const Duration(days: 7)); // change to 7
-    String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(weekAgo);
+  Future<ApiResponse<dynamic>> getMeasurements(String sensorId, String view) async {
     return await _standardizeResponse(dio.get('/measurement/$sensorId', queryParameters: {
-      'limit' : 384, // 8 days, although, shouldn't be necessary
-      'sort': 1,
-      'startDate': formattedDate,
-    }));
-  }
-
-  Future<ApiResponse<dynamic>> getMeasurementsMonth(String sensorId) async {
-    DateTime monthAgo = DateTime.now().subtract(const Duration(days: 31)); // change to 31
-    String formattedDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(monthAgo);
-    return await _standardizeResponse(
-      dio.get('/measurement/$sensorId', queryParameters: {
-      'sort': 1,
-      'startDate': formattedDate,
+      'view': view,
     }));
   }
 }

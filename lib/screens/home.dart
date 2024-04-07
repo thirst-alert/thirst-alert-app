@@ -56,93 +56,96 @@ class HomeScreenState extends State<HomeScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Hello, ${identityManager.username ?? ''}'),
-        leading: Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-              icon: const Icon(Icons.menu_rounded),
-              onPressed: () {
-                Navigator.pushNamed(context, '/user');
-              },
-            );
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: onLogout,
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 45),
-        child: Column(
-          children: [
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10.0,
-                  mainAxisSpacing: 10.0,
-                ),
-                itemCount: mySensors!.length,
-                itemBuilder: (context, index) {
-                  final sensor = mySensors![index];
-                  return GestureDetector(
-                      onTap: () {
-                        onViewSensor(sensor);
-                      },
-                      child: SizedBox(
-                        child: Card(
-                        elevation: 3,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16.0),
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: sensor.isImageLoading
-                                  ? const Center(child: CircularProgressIndicator())
-                                  : Container(
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: sensor.image,
-                                          fit: BoxFit.cover
-                                        ),
-                                      ),
-                                    )
-                              ),
-                              ListTile(
-                                title: Text(sensor.name),
-                                trailing: sensor.active == true 
-                                ? const Icon(Icons.favorite, color: accent) 
-                                : const Icon(Icons.water_drop, color: attention),
-                              ),
-                            ],
-                          ),
-                        )
-                      )
-                    )
-                  );
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Hello, ${identityManager.username ?? ''}'),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.menu_rounded),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/user');
                 },
-              ),
-            ),
-            SizedBox(
-              height: 60,
-              width: 60,
-              child: ElevatedButton(
-                onPressed: onAddSensor,
-                style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add),
-                  ],
-                ),
-              ),
+              );
+            },
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout_rounded),
+              onPressed: onLogout,
             ),
           ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 45),
+          child: Column(
+            children: [
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10.0,
+                    mainAxisSpacing: 10.0,
+                  ),
+                  itemCount: mySensors!.length,
+                  itemBuilder: (context, index) {
+                    final sensor = mySensors![index];
+                    return GestureDetector(
+                        onTap: () {
+                          onViewSensor(sensor);
+                        },
+                        child: SizedBox(
+                          child: Card(
+                          elevation: 3,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16.0),
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: sensor.isImageLoading
+                                    ? const Center(child: CircularProgressIndicator())
+                                    : Container(
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: sensor.image,
+                                            fit: BoxFit.cover
+                                          ),
+                                        ),
+                                      )
+                                ),
+                                ListTile(
+                                  title: Text(sensor.name),
+                                  trailing: sensor.active == true 
+                                  ? const Icon(Icons.favorite, color: accent) 
+                                  : const Icon(Icons.water_drop, color: attention),
+                                ),
+                              ],
+                            ),
+                          )
+                        )
+                      )
+                    );
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 60,
+                width: 60,
+                child: ElevatedButton(
+                  onPressed: onAddSensor,
+                  style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

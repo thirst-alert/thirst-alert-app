@@ -6,29 +6,43 @@ import 'screens/register.dart';
 import 'screens/home.dart';
 import 'screens/user.dart';
 import 'screens/information.dart';
-// import 'screens/sensor.dart';
 import 'screens/sensor/start.dart';
+import 'identity_manager.dart';
+import 'api.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future main() async {
   await dotenv.load();
-  runApp(const MyApp());
+  bool isLoggedIn = false;
+  final identityManager = IdentityManager();
+  await identityManager.initFromStorage();
+  if (identityManager.accessToken != null) {
+    final Api api = Api();
+    final ApiResponse res = await api.me();
+    if (res.success) isLoggedIn = true;
+  }
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Thirst Alert',
       theme: myTheme,
+      initialRoute: isLoggedIn ? '/home' : '/',
+      navigatorKey: navigatorKey,
       routes: {
         '/': (context) => const LoginScreen(),
         '/register':(context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
         '/user': (context) => const UserScreen(),
         '/information': (context) => InformationScreen(0),
-        // '/viewSensor': (context) => SensorScreen(),
         '/sensor/start': (context) => const SensorStart(),
       },
     );
