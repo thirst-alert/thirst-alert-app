@@ -5,20 +5,22 @@ import '../../theme.dart';
 import '../../api.dart';
 
 class Measurement {
-  final double moisture;
-  final double temperature;
+  final double? moisture;
+  final double? temperature;
   final String date;
 
   factory Measurement.fromMap(Map<String, dynamic> measurement) {
     return Measurement(
-      moisture: measurement['moisture'].toDouble(),
-      temperature: measurement['temperature'].toDouble(),
-      date: measurement['createdAt'],
+      moisture: measurement['moisture']?.toDouble(),
+      temperature: measurement['temperature']?.toDouble(),
+      date: measurement['createdAt']
     );
   }
 
-  Measurement(
-      {required this.moisture, required this.temperature, required this.date,
+  Measurement({
+    required this.moisture,
+    required this.temperature,
+    required this.date
   });
 }
 
@@ -163,11 +165,11 @@ LineChartBarData get lineChartBarData {
     List<FlSpot> spots = [];
     if (defaultView) {
       for (int i = 0; i < measurementsWeek.length; i ++) {
-        spots.add(FlSpot(i.toDouble(), measurementsWeek[i].moisture.toDouble()));
+        spots.add(measurementsWeek[i].moisture == null ? FlSpot.nullSpot : FlSpot(i.toDouble(), measurementsWeek[i].moisture!.toDouble()));
       }
     } else {
       for (int i = 0; i < measurementsMonth.length; i ++) {
-        spots.add(FlSpot(i.toDouble(), measurementsMonth[i].moisture.toDouble()));
+        spots.add(measurementsMonth[i].moisture == null ? FlSpot.nullSpot : FlSpot(i.toDouble(), measurementsMonth[i].moisture!.toDouble()));
       }
     }
 
@@ -237,12 +239,17 @@ class SensorChartState extends State<SensorChart> {
 
   @override
   Widget build(BuildContext context) {
-    double latestTemperature = 0.0; 
-    double latestMoisture = 0.0;
+    dynamic latestTemperature = '';
+    dynamic latestMoisture = '';
 
-    if (measurementsWeek.isNotEmpty) {
-      latestTemperature = measurementsWeek[measurementsWeek.length - 1].temperature;
-      latestMoisture = measurementsWeek[measurementsWeek.length - 1].moisture;
+    if (measurementsMonth.isNotEmpty) {
+      for (int i = measurementsMonth.length - 1; i >= 0; i--) {
+        if (measurementsMonth[i].moisture != null) {
+          latestMoisture = measurementsMonth[i].moisture!;
+          latestTemperature = measurementsMonth[i].temperature!;
+          break;
+        }
+      }
     }
 
     return AspectRatio(
