@@ -2,6 +2,8 @@ PODS:
   - Flutter (1.0.0)
   - flutter_blue_plus (0.0.1):
     - Flutter
+  - flutter_local_notifications (0.0.1):
+    - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
   - image_picker_ios (0.0.1):
@@ -13,6 +15,7 @@ PODS:
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_blue_plus (from `.symlinks/plugins/flutter_blue_plus/ios`)
+  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -22,6 +25,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_blue_plus:
     :path: ".symlinks/plugins/flutter_blue_plus/ios"
+  flutter_local_notifications:
+    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   image_picker_ios:
@@ -32,6 +37,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_blue_plus: 4837da7d00cf5d441fdd6635b3a57f936778ea96
+  flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   image_picker_ios: b545a5f16c0fa88e3ecbbce3ed4de45567a8ec18
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c

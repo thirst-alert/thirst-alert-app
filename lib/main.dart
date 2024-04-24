@@ -9,11 +9,13 @@ import 'screens/information.dart';
 import 'screens/sensor/start.dart';
 import 'identity_manager.dart';
 import 'api.dart';
+import 'package:flutter/services.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future main() async {
   await dotenv.load();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   bool isLoggedIn = false;
   final identityManager = IdentityManager();
   await identityManager.initFromStorage();
@@ -33,6 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Thirst Alert',
       theme: myTheme,
       initialRoute: isLoggedIn ? '/home' : '/',

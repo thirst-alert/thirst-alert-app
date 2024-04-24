@@ -4,6 +4,27 @@ import '../api.dart';
 import 'alert.dart';
 import 'package:thirst_alert/screens/sensor.dart';
 import 'package:thirst_alert/sensor_manager.dart' show Sensor;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+class LocalNotificationService {
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  Future<void> init() async {
+    const  iosInitializationSetting = DarwinInitializationSettings();
+    const InitializationSettings initializationSettings = InitializationSettings(iOS: iosInitializationSetting);
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> showNotification(String title, String body) async {
+    const iosNotificatonDetail = DarwinNotificationDetails();
+    const notificationDetails = NotificationDetails(
+      iOS: iosNotificatonDetail,
+    );
+    _flutterLocalNotificationsPlugin.show(0, title, body, notificationDetails);
+  }
+}
+
+final LocalNotificationService localNotificationService = LocalNotificationService();
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -72,6 +93,14 @@ class HomeScreenState extends State<HomeScreen> {
             },
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications_rounded),
+              onPressed: onInitNotifications,
+            ),
+            IconButton(
+              icon: const Icon(Icons.notifications_active_rounded),
+              onPressed: onSendNotification,
+            ),
             IconButton(
               icon: const Icon(Icons.logout_rounded),
               onPressed: onLogout,
@@ -170,5 +199,13 @@ class HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       Error.show(context, 'Something went wrong');
     }
+  }
+
+  void onInitNotifications() async {
+    await localNotificationService.init();
+  }
+
+  void onSendNotification() async {
+    await localNotificationService.showNotification('ThirstAlert', 'Your Monstera is thirsty!');
   }
 }
