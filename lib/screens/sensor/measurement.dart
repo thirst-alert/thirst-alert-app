@@ -27,11 +27,12 @@ class Measurement {
 class _LineChart extends StatelessWidget {
 
   final String sensorId;
+  final int thirstLevel;
   final bool defaultView;
   final List<Measurement> measurementsWeek;
   final List<Measurement> measurementsMonth;
 
-  const _LineChart({required this.defaultView, required this.sensorId, required this.measurementsMonth, required this.measurementsWeek});
+  const _LineChart({required this.defaultView, required this.sensorId, required this.measurementsMonth, required this.measurementsWeek, required this.thirstLevel});
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +52,8 @@ class _LineChart extends StatelessWidget {
         rangeAnnotations: RangeAnnotations(
           horizontalRangeAnnotations: [
             HorizontalRangeAnnotation(
-              y1: 60,
-              y2: 80,
+              y1: 50 + (thirstLevel * 10),
+              y2: 70 + (thirstLevel * 10),
               color: primary.withOpacity(0.3),
             ),
           ],
@@ -72,8 +73,8 @@ class _LineChart extends StatelessWidget {
         rangeAnnotations: RangeAnnotations(
           horizontalRangeAnnotations: [
             HorizontalRangeAnnotation(
-              y1: 60,
-              y2: 80,
+              y1: 50 + (thirstLevel * 10),
+              y2: 70 + (thirstLevel * 10),
               color: primary.withOpacity(0.3),
             ),
           ],
@@ -189,7 +190,8 @@ LineChartBarData get lineChartBarData {
 class SensorChart extends StatefulWidget {
 
   final String sensorId;
-  const SensorChart({super.key, required this.sensorId});
+  final int thirstLevel;
+  const SensorChart({super.key, required this.sensorId, required this.thirstLevel});
 
   @override
   State<StatefulWidget> createState() => SensorChartState();
@@ -277,7 +279,7 @@ class SensorChartState extends State<SensorChart> {
             ],
           ),
         ),
-        Expanded(child: _LineChart(defaultView: defaultView, sensorId: widget.sensorId, measurementsWeek: measurementsWeek, measurementsMonth: measurementsMonth)),
+        Expanded(child: _LineChart(defaultView: defaultView, sensorId: widget.sensorId, measurementsWeek: measurementsWeek, measurementsMonth: measurementsMonth, thirstLevel: widget.thirstLevel)),
         const SizedBox(
           height: 30,
         ),

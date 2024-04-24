@@ -169,7 +169,7 @@ class SensorScreenState extends State<SensorScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 10),
               ////
-              child: SensorChart(sensorId: sensor.sensorId),
+              child: SensorChart(sensorId: sensor.sensorId, thirstLevel: sensor.thirstLevel),
               ),
 
             const SizedBox(height: 40),

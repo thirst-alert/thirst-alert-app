@@ -13,6 +13,7 @@ class LoginScreenState extends State<LoginScreen> {
   final TextEditingController _identityController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _verificationTokenController = TextEditingController();
+  final TextEditingController _resetController = TextEditingController();
   bool _passwordIsObscured = true;
 
   Api api = Api();
@@ -100,7 +101,7 @@ class LoginScreenState extends State<LoginScreen> {
                               children: <Widget>[
                                 const SizedBox(height: 20),
                                 TextField(
-                                  controller: _identityController,
+                                  controller: _resetController,
                                   textAlign: TextAlign.center,
                                   decoration: const InputDecoration(
                                     label: Center(
@@ -207,7 +208,7 @@ class LoginScreenState extends State<LoginScreen> {
 
   void onResetPassword() {
     api.resetPassword({
-      'email': _identityController.text
+      'email': _resetController.text
     }).then((response) {      
       if (response.success) {
         Success.show(context, 'We sent you an email to reset your password');

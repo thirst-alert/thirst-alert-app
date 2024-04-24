@@ -94,14 +94,6 @@ class HomeScreenState extends State<HomeScreen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.notifications_rounded),
-              onPressed: onInitNotifications,
-            ),
-            IconButton(
-              icon: const Icon(Icons.notifications_active_rounded),
-              onPressed: onSendNotification,
-            ),
-            IconButton(
               icon: const Icon(Icons.logout_rounded),
               onPressed: onLogout,
             ),
