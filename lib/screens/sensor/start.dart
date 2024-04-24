@@ -37,7 +37,7 @@ class SensorStartState extends State<SensorStart> {
         btStatus = true;
         _startScan();
       } else {
-        Error.show(context, "Bluetooth is turned off. Enable it and try scanning again.");
+        // Error.show(context, "Bluetooth is turned off. Enable it and try scanning again.");
         setState(() {
           devices.clear();
         });
